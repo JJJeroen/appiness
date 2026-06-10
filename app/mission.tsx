@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import {
-  View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, Pressable, Animated,
+  View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, Pressable, Animated, Share,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -14,7 +14,7 @@ import {
 } from '../src/services/MissionService';
 import { useLocale } from '../src/hooks/useLocale';
 import { getGradient, colors, typography } from '../src/theme';
-import { requestAndSchedule } from '../src/services/NotificationService';
+import { requestAndSchedule, rescheduleIfGranted } from '../src/services/NotificationService';
 
 const UNDO_WINDOW_MS = 5000;
 
@@ -122,6 +122,8 @@ export default function MissionScreen() {
     await completeMission(mission.id);
     const [newStreak, newTotal] = await Promise.all([getStreak(), getTotalCompletions()]);
     pendingMilestone.current = detectMilestone(newStreak, newTotal);
+    // Refresh next day's notification message with updated lifecycle context
+    rescheduleIfGranted().catch(() => {});
     setShowUndo(true);
     undoTimeout.current = setTimeout(() => {
       setShowUndo(false);
@@ -321,6 +323,7 @@ function CompletedTodayView({
           : 'Come back tomorrow for your next mission.',
       history: 'See history',
       stats: 'Stats',
+      share: 'Share',
       notifQuestion: 'Want a daily reminder?',
       notifYes: 'Enable notifications',
       notifNo: 'No thanks',
@@ -334,6 +337,7 @@ function CompletedTodayView({
           : 'Kom morgen terug voor je volgende missie.',
       history: 'Bekijk historie',
       stats: 'Statistieken',
+      share: 'Delen',
       notifQuestion: 'Wil je een dagelijkse herinnering?',
       notifYes: 'Meldingen inschakelen',
       notifNo: 'Nee bedankt',
@@ -392,9 +396,24 @@ function CompletedTodayView({
               <TouchableOpacity onPress={() => router.push('/history')} style={styles.historyLink}>
                 <Text style={styles.historyLinkText}>{copy.history}</Text>
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => router.push('/stats')} style={styles.statsLinkButton}>
-                <Text style={styles.statsLinkText}>{copy.stats}</Text>
-              </TouchableOpacity>
+              <View style={styles.completedSecondaryLinks}>
+                <TouchableOpacity onPress={() => router.push('/stats')} style={styles.statsLinkButton}>
+                  <Text style={styles.statsLinkText}>{copy.stats}</Text>
+                </TouchableOpacity>
+                {lastMissionText && (
+                  <TouchableOpacity
+                    onPress={() => {
+                      const msg = locale === 'nl'
+                        ? (streak > 1 ? `Dag ${streak}. Vandaag: "${lastMissionText}" — via Appiness` : `Vandaag: "${lastMissionText}" — via Appiness`)
+                        : (streak > 1 ? `Day ${streak} of kindness. Today I: "${lastMissionText}" — via Appiness` : `Today I: "${lastMissionText}" — via Appiness`);
+                      Share.share({ message: msg });
+                    }}
+                    style={styles.statsLinkButton}
+                  >
+                    <Text style={styles.statsLinkText}>{copy.share}</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
             </View>
           )}
         </View>
@@ -676,6 +695,7 @@ const styles = StyleSheet.create({
     color: colors.text,
     fontSize: 16,
   },
+  completedSecondaryLinks: { flexDirection: 'row', gap: 20, justifyContent: 'center' },
   statsLinkButton: { paddingVertical: 6 },
   statsLinkText: { color: colors.textMuted, fontSize: 15, fontWeight: '500' },
   notifPrompt: {
