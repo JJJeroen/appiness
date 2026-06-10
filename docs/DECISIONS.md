@@ -107,6 +107,33 @@ See decision above.
 
 ---
 
+## [2026-06-10] Daily reset, streak, and optional push notifications
+
+**Decision:** One mission per calendar day. Completing locks the app until tomorrow. Skipping replaces today's mission in-place. Consecutive-day completions build a streak. Daily push notification at 9 AM (opt-in, requested at onboarding).
+
+**Daily mechanics:**
+- `getTodaysMission()` returns `null` if already completed today → screen shows "done for today" + streak
+- First open of a new day assigns the next mission from the shuffled queue
+- Skip: moves current mission to end of queue, assigns the next one as today's mission — same day, different mission. Does not defer to tomorrow or skip the day.
+- Streak increments on first completion of each calendar day. Missing a day resets to 1. Streak only shown when > 0 on the mission screen; shown prominently on the "done for today" screen when > 1.
+
+**Why one-per-day:**
+- Without a daily limit, users can complete all 40 missions in one session and the app has nothing left to offer. Daily pacing creates a return habit.
+- The "done for today" screen is the moment of positive reinforcement — it acknowledges the streak and gives a clear reason to come back tomorrow.
+
+**Why skip replaces rather than defers:**
+- Deferring ("come back tomorrow with the same mission") punishes users who can't do a specific mission due to circumstance (shift work, social anxiety, wrong context). That's a bad experience.
+- Replacing ("give me a different one today") preserves the daily rhythm while respecting that some missions don't fit every life every day.
+- Skip tokens are still earned and limited — the friction is low enough to be fair, high enough to discourage lazy use.
+
+**Notifications:**
+- Opt-in only. Requested at the end of onboarding when the user taps the CTA — system permission prompt appears. Navigation to mission screen happens regardless of whether permission is granted.
+- Scheduled daily at 9 AM using Expo's `DAILY` trigger (persisted on device, survives app restarts).
+- Rescheduled from scratch on each permission grant to avoid duplicates.
+- Default time of 9 AM is an assumption. A settings screen to change this is deferred.
+
+---
+
 ## [2026-06-10] Known issues not yet fixed (logged for awareness)
 
 These were identified in the same review but deferred:

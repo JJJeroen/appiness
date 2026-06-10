@@ -5,16 +5,18 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import {
-  Mission, getNextMission, completeMission, skipMission, getSkips,
+  Mission, getTodaysMission, completeMission, skipMission, getSkips, getStreak,
 } from '../src/services/MissionService';
 import { useLocale } from '../src/hooks/useLocale';
 import { getGradient, colors, typography } from '../src/theme';
 
 export default function MissionScreen() {
   const locale = useLocale();
-  const [mission, setMission] = useState<Mission | null>(null);
+  const [mission, setMission] = useState<Mission | null | undefined>(undefined);
   const [skips, setSkips] = useState(0);
+  const [streak, setStreak] = useState(0);
   const [showTip, setShowTip] = useState(false);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -22,9 +24,14 @@ export default function MissionScreen() {
   const load = useCallback(async () => {
     setLoading(true);
     setShowTip(false);
-    const [next, availableSkips] = await Promise.all([getNextMission(), getSkips()]);
+    const [next, availableSkips, currentStreak] = await Promise.all([
+      getTodaysMission(),
+      getSkips(),
+      getStreak(),
+    ]);
     setMission(next);
     setSkips(availableSkips);
+    setStreak(currentStreak);
     setLoading(false);
     setSubmitting(false);
   }, []);
@@ -45,13 +52,18 @@ export default function MissionScreen() {
     load();
   };
 
-  if (loading || !mission) {
-    const gradient: [string, string] = ['#C17A74', '#7A3E3E'];
+  // Loading state
+  if (loading || mission === undefined) {
     return (
-      <LinearGradient colors={gradient} style={styles.container}>
+      <LinearGradient colors={getGradient('others', 'easy')} style={styles.container}>
         <ActivityIndicator color="#fff" size="large" />
       </LinearGradient>
     );
+  }
+
+  // Completed today — rest until tomorrow
+  if (mission === null) {
+    return <CompletedTodayView locale={locale} streak={streak} />;
   }
 
   const gradient = getGradient(mission.category, mission.difficulty);
@@ -63,25 +75,32 @@ export default function MissionScreen() {
     <LinearGradient colors={gradient} style={styles.container}>
       <SafeAreaView style={styles.safe}>
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.push('/history')} style={styles.historyButton}>
-            <Text style={styles.historyButtonText}>{locale === 'nl' ? 'Historie' : 'History'}</Text>
-          </TouchableOpacity>
-          {skips > 0 && (
-            <View style={styles.skipBadge}>
-              <Text style={styles.skipBadgeText}>{skips} {skips === 1 ? 'skip' : 'skips'}</Text>
+          {streak > 0 ? (
+            <View style={styles.streakBadge}>
+              <Ionicons name="flame" size={14} color="rgba(255,255,255,0.9)" />
+              <Text style={styles.streakText}>{streak}</Text>
             </View>
-          )}
+          ) : <View />}
+          <View style={styles.headerRight}>
+            {canSkip && (
+              <View style={styles.skipBadge}>
+                <Text style={styles.skipBadgeText}>{skips} {skips === 1 ? 'skip' : 'skips'}</Text>
+              </View>
+            )}
+            <TouchableOpacity onPress={() => router.push('/history')} style={styles.historyButton}>
+              <Text style={styles.historyButtonText}>{locale === 'nl' ? 'Historie' : 'History'}</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         <View style={styles.body}>
           <Text style={styles.missionText}>{missionText}</Text>
-
           <View style={styles.tipContainer}>
             {showTip ? (
               <Text style={styles.tipText}>{hintText}</Text>
             ) : (
               <Pressable onPress={() => setShowTip(true)} style={styles.tipButton}>
-                <Text style={styles.tipButtonText}>{locale === 'nl' ? '? Tip' : '? Tip'}</Text>
+                <Text style={styles.tipButtonText}>? Tip</Text>
               </Pressable>
             )}
           </View>
@@ -91,7 +110,7 @@ export default function MissionScreen() {
           <TouchableOpacity
             style={[styles.skipButton, !canSkip && styles.skipButtonDisabled]}
             onPress={handleSkip}
-            disabled={!canSkip}
+            disabled={!canSkip || submitting}
             activeOpacity={0.7}
           >
             <Text style={[styles.skipText, !canSkip && styles.skipTextDisabled]}>
@@ -113,6 +132,50 @@ export default function MissionScreen() {
   );
 }
 
+// ─── Completed today view ─────────────────────────────────────────────────────
+
+function CompletedTodayView({ locale, streak }: { locale: 'nl' | 'en'; streak: number }) {
+  const gradient = getGradient('self', 'medium');
+  const copy = {
+    en: {
+      well: 'Well done.',
+      body: streak > 1
+        ? `${streak} days in a row. Come back tomorrow for your next mission.`
+        : 'Come back tomorrow for your next mission.',
+      history: 'See history',
+    },
+    nl: {
+      well: 'Goed gedaan.',
+      body: streak > 1
+        ? `${streak} dagen op rij. Kom morgen terug voor je volgende missie.`
+        : 'Kom morgen terug voor je volgende missie.',
+      history: 'Bekijk historie',
+    },
+  }[locale];
+
+  return (
+    <LinearGradient colors={gradient} style={styles.container}>
+      <SafeAreaView style={styles.safe}>
+        <View style={styles.completedContainer}>
+          {streak > 1 && (
+            <View style={styles.streakLarge}>
+              <Ionicons name="flame" size={32} color="rgba(255,255,255,0.9)" />
+              <Text style={styles.streakLargeNumber}>{streak}</Text>
+            </View>
+          )}
+          <Text style={styles.completedTitle}>{copy.well}</Text>
+          <Text style={styles.completedBody}>{copy.body}</Text>
+          <TouchableOpacity onPress={() => router.push('/history')} style={styles.historyLink}>
+            <Text style={styles.historyLinkText}>{copy.history}</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    </LinearGradient>
+  );
+}
+
+// ─── Styles ──────────────────────────────────────────────────────────────────
+
 const styles = StyleSheet.create({
   container: { flex: 1 },
   safe: { flex: 1, paddingHorizontal: 24 },
@@ -124,11 +187,23 @@ const styles = StyleSheet.create({
     paddingTop: 12,
     paddingBottom: 8,
   },
-  historyButton: { padding: 8 },
-  historyButtonText: {
-    color: colors.textMuted,
-    fontSize: 15,
-    fontWeight: '500',
+  headerRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  streakBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    borderRadius: 20,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+  },
+  streakText: {
+    ...typography.skipBadge,
+    color: colors.text,
   },
   skipBadge: {
     backgroundColor: colors.skip,
@@ -139,6 +214,12 @@ const styles = StyleSheet.create({
   skipBadgeText: {
     ...typography.skipBadge,
     color: colors.text,
+  },
+  historyButton: { padding: 4 },
+  historyButtonText: {
+    color: colors.textMuted,
+    fontSize: 15,
+    fontWeight: '500',
   },
 
   body: {
@@ -213,5 +294,51 @@ const styles = StyleSheet.create({
   doneText: {
     ...typography.button,
     color: colors.done,
+  },
+
+  // Completed today
+  completedContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 16,
+    paddingHorizontal: 12,
+  },
+  streakLarge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 8,
+  },
+  streakLargeNumber: {
+    fontSize: 48,
+    fontWeight: '700',
+    color: colors.text,
+  },
+  completedTitle: {
+    fontSize: 32,
+    fontWeight: '700',
+    color: colors.text,
+    textAlign: 'center',
+  },
+  completedBody: {
+    ...typography.tip,
+    color: colors.textMuted,
+    textAlign: 'center',
+    lineHeight: 28,
+  },
+  historyLink: {
+    marginTop: 16,
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    backgroundColor: colors.doneBg,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.25)',
+  },
+  historyLinkText: {
+    ...typography.button,
+    color: colors.text,
+    fontSize: 16,
   },
 });

@@ -18,16 +18,33 @@ export type CompletedEntry = {
 };
 
 const KEYS = {
-  queue: '@appiness/queue',
-  completed: '@appiness/completed',
-  skips: '@appiness/skips',
-  firstLaunch: '@appiness/firstLaunch',
+  queue:             '@appiness/queue',
+  completed:         '@appiness/completed',
+  skips:             '@appiness/skips',
+  firstLaunch:       '@appiness/firstLaunch',
+  todaysMissionId:   '@appiness/todaysMissionId',
+  lastAssignedDate:  '@appiness/lastAssignedDate',
+  lastCompletedDate: '@appiness/lastCompletedDate',
+  streak:            '@appiness/streak',
 };
 
 const MAX_SKIPS = 2;
-const SKIPS_PER_COMPLETION = 1;
 
 const missions: Mission[] = missionsData as Mission[];
+
+// ─── Date helpers ────────────────────────────────────────────────────────────
+
+function todayStr(): string {
+  return new Date().toISOString().split('T')[0];
+}
+
+function yesterdayStr(): string {
+  const d = new Date();
+  d.setDate(d.getDate() - 1);
+  return d.toISOString().split('T')[0];
+}
+
+// ─── Queue helpers ───────────────────────────────────────────────────────────
 
 function shuffled(arr: Mission[]): Mission[] {
   const copy = [...arr];
@@ -39,8 +56,12 @@ function shuffled(arr: Mission[]): Mission[] {
 }
 
 async function getQueue(): Promise<number[]> {
-  const raw = await AsyncStorage.getItem(KEYS.queue);
-  if (raw) return JSON.parse(raw);
+  try {
+    const raw = await AsyncStorage.getItem(KEYS.queue);
+    if (raw) return JSON.parse(raw);
+  } catch {
+    // Corrupted queue — reset silently
+  }
   const fresh = shuffled(missions).map((m) => m.id);
   await AsyncStorage.setItem(KEYS.queue, JSON.stringify(fresh));
   return fresh;
@@ -50,59 +71,132 @@ async function saveQueue(queue: number[]): Promise<void> {
   await AsyncStorage.setItem(KEYS.queue, JSON.stringify(queue));
 }
 
-export async function getNextMission(): Promise<Mission> {
+async function assignNewTodaysMission(): Promise<Mission> {
   let queue = await getQueue();
   if (queue.length === 0) {
     queue = shuffled(missions).map((m) => m.id);
+    await saveQueue(queue);
   }
   const nextId = queue[0];
+  await AsyncStorage.setItem(KEYS.todaysMissionId, JSON.stringify(nextId));
+  await AsyncStorage.setItem(KEYS.lastAssignedDate, todayStr());
   return missions.find((m) => m.id === nextId) ?? missions[0];
 }
 
-export async function completeMission(missionId: number): Promise<void> {
-  // Advance queue
-  const queue = await getQueue();
-  const next = queue.filter((id) => id !== missionId);
-  await saveQueue(next);
+// ─── Public API ──────────────────────────────────────────────────────────────
 
-  // Record completion
-  const raw = await AsyncStorage.getItem(KEYS.completed);
-  const history: CompletedEntry[] = raw ? JSON.parse(raw) : [];
-  history.unshift({ missionId, completionDate: new Date().toISOString() });
-  await AsyncStorage.setItem(KEYS.completed, JSON.stringify(history));
+// Returns null if the user has already completed today's mission.
+export async function getTodaysMission(): Promise<Mission | null> {
+  try {
+    const today = todayStr();
 
-  // Award skip (capped at MAX_SKIPS)
-  const current = await getSkips();
-  await AsyncStorage.setItem(
-    KEYS.skips,
-    JSON.stringify(Math.min(current + SKIPS_PER_COMPLETION, MAX_SKIPS))
-  );
+    // Already completed today — no mission until tomorrow
+    const lastCompleted = await AsyncStorage.getItem(KEYS.lastCompletedDate);
+    if (lastCompleted === today) return null;
+
+    // Mission already assigned today — return it
+    const lastAssigned = await AsyncStorage.getItem(KEYS.lastAssignedDate);
+    const storedIdRaw = await AsyncStorage.getItem(KEYS.todaysMissionId);
+    if (lastAssigned === today && storedIdRaw !== null) {
+      const id = JSON.parse(storedIdRaw) as number;
+      const found = missions.find((m) => m.id === id);
+      if (found) return found;
+    }
+
+    // New day or no assignment yet
+    return assignNewTodaysMission();
+  } catch {
+    return assignNewTodaysMission();
+  }
 }
 
+export async function completeMission(missionId: number): Promise<void> {
+  const today = todayStr();
+
+  // Remove from queue
+  const queue = await getQueue();
+  await saveQueue(queue.filter((id) => id !== missionId));
+
+  // Record in history
+  try {
+    const raw = await AsyncStorage.getItem(KEYS.completed);
+    const history: CompletedEntry[] = raw ? JSON.parse(raw) : [];
+    history.unshift({ missionId, completionDate: new Date().toISOString() });
+    await AsyncStorage.setItem(KEYS.completed, JSON.stringify(history));
+  } catch {
+    await AsyncStorage.setItem(
+      KEYS.completed,
+      JSON.stringify([{ missionId, completionDate: new Date().toISOString() }])
+    );
+  }
+
+  // Update streak — only on first completion of the day
+  try {
+    const lastCompleted = await AsyncStorage.getItem(KEYS.lastCompletedDate);
+    if (lastCompleted !== today) {
+      const current = await getStreak();
+      const next = lastCompleted === yesterdayStr() ? current + 1 : 1;
+      await AsyncStorage.setItem(KEYS.streak, JSON.stringify(next));
+      await AsyncStorage.setItem(KEYS.lastCompletedDate, today);
+    }
+  } catch {
+    await AsyncStorage.setItem(KEYS.streak, JSON.stringify(1));
+    await AsyncStorage.setItem(KEYS.lastCompletedDate, today);
+  }
+
+  // Award skip (capped at MAX_SKIPS)
+  const currentSkips = await getSkips();
+  await AsyncStorage.setItem(KEYS.skips, JSON.stringify(Math.min(currentSkips + 1, MAX_SKIPS)));
+}
+
+// Skip replaces today's mission with the next one in queue. Does not defer to tomorrow.
 export async function skipMission(missionId: number): Promise<void> {
   const skips = await getSkips();
   if (skips <= 0) return;
 
-  // Move current mission to end of queue
+  // Move skipped mission to end of queue
   const queue = await getQueue();
-  const next = [...queue.filter((id) => id !== missionId), missionId];
-  await saveQueue(next);
+  const reordered = [...queue.filter((id) => id !== missionId), missionId];
+  await saveQueue(reordered);
 
+  // Deduct skip
   await AsyncStorage.setItem(KEYS.skips, JSON.stringify(skips - 1));
+
+  // Assign next mission as today's — same day, different mission
+  const nextId = reordered[0];
+  await AsyncStorage.setItem(KEYS.todaysMissionId, JSON.stringify(nextId));
+  // lastAssignedDate stays as today — already set
 }
 
 export async function getSkips(): Promise<number> {
-  const raw = await AsyncStorage.getItem(KEYS.skips);
-  return raw ? JSON.parse(raw) : 0;
+  try {
+    const raw = await AsyncStorage.getItem(KEYS.skips);
+    return raw ? JSON.parse(raw) : 0;
+  } catch {
+    return 0;
+  }
+}
+
+export async function getStreak(): Promise<number> {
+  try {
+    const raw = await AsyncStorage.getItem(KEYS.streak);
+    return raw ? JSON.parse(raw) : 0;
+  } catch {
+    return 0;
+  }
 }
 
 export async function getHistory(): Promise<(CompletedEntry & { mission: Mission })[]> {
-  const raw = await AsyncStorage.getItem(KEYS.completed);
-  const history: CompletedEntry[] = raw ? JSON.parse(raw) : [];
-  return history.map((entry) => ({
-    ...entry,
-    mission: missions.find((m) => m.id === entry.missionId) ?? missions[0],
-  }));
+  try {
+    const raw = await AsyncStorage.getItem(KEYS.completed);
+    const history: CompletedEntry[] = raw ? JSON.parse(raw) : [];
+    return history.map((entry) => ({
+      ...entry,
+      mission: missions.find((m) => m.id === entry.missionId) ?? missions[0],
+    }));
+  } catch {
+    return [];
+  }
 }
 
 export async function isFirstLaunch(): Promise<boolean> {

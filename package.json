@@ -3,10 +3,12 @@
   "version": "1.0.0",
   "main": "index.ts",
   "dependencies": {
+    "@expo/vector-icons": "^15.1.1",
     "@react-native-async-storage/async-storage": "2.2.0",
     "expo": "~56.0.9",
     "expo-linear-gradient": "~56.0.4",
     "expo-localization": "~56.0.6",
+    "expo-notifications": "~56.0.16",
     "expo-router": "~56.2.9",
     "expo-status-bar": "~56.0.4",
     "react": "19.2.3",
