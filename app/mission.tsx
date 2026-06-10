@@ -17,6 +17,7 @@ export default function MissionScreen() {
   const [skips, setSkips] = useState(0);
   const [showTip, setShowTip] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -25,20 +26,21 @@ export default function MissionScreen() {
     setMission(next);
     setSkips(availableSkips);
     setLoading(false);
+    setSubmitting(false);
   }, []);
 
   useEffect(() => { load(); }, [load]);
 
   const handleDone = async () => {
-    if (!mission) return;
-    setLoading(true);
+    if (!mission || submitting) return;
+    setSubmitting(true);
     await completeMission(mission.id);
     load();
   };
 
   const handleSkip = async () => {
-    if (!mission || skips <= 0) return;
-    setLoading(true);
+    if (!mission || skips <= 0 || submitting) return;
+    setSubmitting(true);
     await skipMission(mission.id);
     load();
   };
@@ -66,7 +68,7 @@ export default function MissionScreen() {
           </TouchableOpacity>
           {skips > 0 && (
             <View style={styles.skipBadge}>
-              <Text style={styles.skipBadgeText}>{skips} {locale === 'nl' ? 'sla over' : skips === 1 ? 'skip' : 'skips'}</Text>
+              <Text style={styles.skipBadgeText}>{skips} {skips === 1 ? 'skip' : 'skips'}</Text>
             </View>
           )}
         </View>
@@ -97,7 +99,12 @@ export default function MissionScreen() {
             </Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.doneButton} onPress={handleDone} activeOpacity={0.8}>
+          <TouchableOpacity
+            style={[styles.doneButton, submitting && styles.doneButtonSubmitting]}
+            onPress={handleDone}
+            disabled={submitting}
+            activeOpacity={0.8}
+          >
             <Text style={styles.doneText}>{locale === 'nl' ? 'Gedaan' : 'Done'}</Text>
           </TouchableOpacity>
         </View>
@@ -199,6 +206,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.3)',
+  },
+  doneButtonSubmitting: {
+    opacity: 0.5,
   },
   doneText: {
     ...typography.button,

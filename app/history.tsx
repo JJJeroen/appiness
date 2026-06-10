@@ -3,10 +3,9 @@ import { View, Text, FlatList, StyleSheet, TouchableOpacity } from 'react-native
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
-import { getHistory, CompletedEntry } from '../src/services/MissionService';
-import { Mission } from '../src/services/MissionService';
+import { getHistory, CompletedEntry, Mission } from '../src/services/MissionService';
 import { useLocale } from '../src/hooks/useLocale';
-import { gradients, colors, typography } from '../src/theme';
+import { getGradient, colors, typography } from '../src/theme';
 
 type HistoryEntry = CompletedEntry & { mission: Mission };
 
@@ -28,7 +27,7 @@ export default function HistoryScreen() {
     : 'Complete a mission to see your history.';
 
   return (
-    <LinearGradient colors={gradients[4]} style={styles.container}>
+    <LinearGradient colors={getGradient('community', 'medium')} style={styles.container}>
       <SafeAreaView style={styles.safe}>
         <View style={styles.header}>
           <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>

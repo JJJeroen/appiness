@@ -63,7 +63,7 @@ A running log of decisions made during development. Intended to be shared with c
 | `medium` | Requires intention or planning | Mid-tone |
 | `hard` | Emotionally heavy or significant commitment | Deeper, more saturated |
 
-**Why no photos:** Photo assets add bundle weight, feel generic, and require licensing. Gradients are lightweight, feel intentional, and give each mission a unique but consistent visual identity. The same mission always shows the same gradient — buildng subtle recognition over time.
+**Why no photos:** Photo assets add bundle weight, feel generic, and require licensing. Gradients are lightweight, feel intentional, and give each mission a unique but consistent visual identity. The same mission always shows the same gradient — building subtle recognition over time.
 
 ---
 
@@ -72,6 +72,51 @@ A running log of decisions made during development. Intended to be shared with c
 **Decision:** Use Expo Router (file-based) over manually configured React Navigation.
 
 **Why:** Less boilerplate, integrates with EAS and deep linking out of the box, and is the direction Expo is standardising on. Three screens (onboarding, mission, history) don't need complex navigation patterns.
+
+---
+
+## [2026-06-10] App identifiers set early
+
+**Decision:** Set `bundleIdentifier` and `package` to `com.appiness.app` in `app.json` before any EAS build is attempted.
+
+**Why:** These identifiers cannot be changed after an app is submitted to either store without creating a new store listing. They must be set before the first EAS build, not after. Using `com.appiness.app` as a placeholder — should be revisited if a publisher domain is established.
+
+---
+
+## [2026-06-10] Bug fixes from pre-share code review
+
+Six issues found and fixed before sharing with collaborator. Logged here for traceability.
+
+**1. Double-tap race on Done button**
+Added a `submitting` state flag that is set synchronously on first press and cleared only after `load()` completes. Button is disabled and visually dimmed while submitting. Previously, two rapid taps could call `completeMission()` twice, producing duplicate history entries and over-incrementing the skip counter.
+
+**2. Dutch skip badge grammatically wrong**
+`"sla over"` is a verb (imperative), not a noun. "2 sla over" read as an instruction, not a count. Replaced with `"1 skip" / "2 skips"` for both locales — "skip" is standard in Dutch app UI and unambiguous.
+
+**3. Hardcoded `gradients[4]` in history screen**
+The history screen used `gradients[4]` — a positional index into a flattened gradient array. Any reordering of the gradient map would silently change the history screen colour with no error. Replaced with `getGradient('community', 'medium')` which is explicit and refactor-safe.
+
+**4. Double import of `Mission` type in history.tsx**
+`Mission` was imported twice from the same module on separate lines. Consolidated into a single import.
+
+**5. `bundleIdentifier` / `package` missing from app.json**
+See decision above.
+
+**6. Typo in DECISIONS.md**
+"buildng" → "building" in the gradient section.
+
+---
+
+## [2026-06-10] Known issues not yet fixed (logged for awareness)
+
+These were identified in the same review but deferred:
+
+- **AsyncStorage writes are not atomic** — `completeMission()` makes 3 sequential writes. A crash between them leaves state inconsistent. Acceptable for Phase 1; revisit when migrating to Supabase.
+- **No try/catch around `JSON.parse`** — a corrupted AsyncStorage value crashes the app with no recovery. Should add error boundaries before production release.
+- **`missions[0]` used as silent fallback** — if a mission ID in the stored queue no longer exists in the JSON, the app silently shows mission 1. Will become relevant if mission IDs ever change.
+- **`useLocale` is not actually a hook** — it calls `getLocales()` synchronously and never re-renders. Works fine for a locale-at-install model but is misleadingly named. Should be renamed `getLocale()`.
+- **No daily limit or re-engagement mechanism** — a user can complete all 40 missions in one session. No notification, no daily reset, no reason to return tomorrow. Active area of design work.
+- **Difficulty encodes emotional effort, not accessibility** — "easy" missions that require leaving the house or having a social circle are not easy for shift workers, remote workers, or people with anxiety. This is a content design gap, not a code issue.
 
 ---
 
