@@ -12,8 +12,10 @@ import {
   hasPromptedForNotification, markNotificationPrompted,
   deferMission, isDeferredToday, getStreakFreezes,
 } from '../src/services/MissionService';
-import { useLocale } from '../src/hooks/useLocale';
+import { getLanguagePreference } from '../src/services/SettingsService';
+import { deviceLocale, Locale } from '../src/hooks/useLocale';
 import { getGradient, colors, typography } from '../src/theme';
+import { useNavigation } from 'expo-router';
 import { requestAndSchedule, rescheduleIfGranted } from '../src/services/NotificationService';
 
 const UNDO_WINDOW_MS = 5000;
@@ -73,7 +75,8 @@ function getMilestoneLine(m: Milestone, locale: 'nl' | 'en'): string {
 }
 
 export default function MissionScreen() {
-  const locale = useLocale();
+  const [locale, setLocale] = useState<Locale>(deviceLocale());
+  const navigation = useNavigation();
   const [mission, setMission] = useState<Mission | null | undefined>(undefined);
   const [skips, setSkips] = useState(0);
   const [streak, setStreak] = useState(0);
@@ -111,6 +114,22 @@ export default function MissionScreen() {
   }, []);
 
   useEffect(() => { load(); }, [load]);
+
+  // Read locale on mount
+  useEffect(() => {
+    getLanguagePreference().then((pref) => {
+      setLocale(pref === 'nl' ? 'nl' : pref === 'en' ? 'en' : deviceLocale());
+    });
+  }, []);
+
+  // Re-read locale when navigating back from settings
+  useEffect(() => {
+    return navigation.addListener('focus', () => {
+      getLanguagePreference().then((pref) => {
+        setLocale(pref === 'nl' ? 'nl' : pref === 'en' ? 'en' : deviceLocale());
+      });
+    });
+  }, [navigation]);
 
   // Clean up undo timer on unmount
   useEffect(() => () => { if (undoTimeout.current) clearTimeout(undoTimeout.current); }, []);
@@ -347,6 +366,11 @@ function CompletedTodayView({
   return (
     <LinearGradient colors={gradient} style={styles.container}>
       <SafeAreaView style={styles.safe}>
+        <View style={styles.completedHeader}>
+          <TouchableOpacity onPress={() => router.push('/settings')} style={styles.settingsButton}>
+            <Ionicons name="settings-outline" size={20} color={colors.textMuted} />
+          </TouchableOpacity>
+        </View>
         <View style={styles.completedContainer}>
           {!deferred && streak > 1 && (
             <View style={styles.streakLarge}>
@@ -604,6 +628,12 @@ const styles = StyleSheet.create({
   },
 
   // Completed today
+  completedHeader: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    paddingTop: 12,
+    paddingBottom: 4,
+  },
   completedContainer: {
     flex: 1,
     justifyContent: 'center',

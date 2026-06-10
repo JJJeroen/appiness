@@ -1,6 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { getLocales } from 'expo-localization';
-import { useFocusEffect } from 'expo-router';
 import { getLanguagePreference } from '../services/SettingsService';
 
 export type Locale = 'nl' | 'en';
@@ -15,18 +14,17 @@ export function getLocale(): Locale {
   return deviceLocale();
 }
 
-// Hook — reads stored preference on mount and whenever the screen regains focus
+// Hook — reads stored preference on mount; falls back to device locale.
+// For screens that stay mounted (e.g. mission), use navigation.addListener('focus')
+// in the screen directly to re-read on return from settings.
 export function useLocale(): Locale {
   const [locale, setLocale] = useState<Locale>(deviceLocale());
 
-  const readPref = useCallback(() => {
+  useEffect(() => {
     getLanguagePreference().then((pref) => {
       setLocale(pref === 'auto' ? deviceLocale() : pref);
     });
   }, []);
-
-  useEffect(() => { readPref(); }, [readPref]);
-  useFocusEffect(readPref);
 
   return locale;
 }

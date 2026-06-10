@@ -231,6 +231,7 @@ export default function SettingsScreen() {
             </View>
           </View>
           {/* Developer */}
+          <View style={styles.devDivider} />
           <Text style={[styles.sectionLabel, styles.devLabel]}>Developer</Text>
           <View style={styles.catList}>
             <TouchableOpacity
@@ -325,5 +326,10 @@ const styles = StyleSheet.create({
   diffDot: { width: 10, height: 10, borderRadius: 5 },
   diffLabel: { color: colors.textMuted, fontSize: 14 },
 
-  devLabel: { opacity: 0.4, marginTop: 40 },
+  devDivider: {
+    marginTop: 40,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255,255,255,0.1)',
+  },
+  devLabel: { opacity: 0.5 },
 });
