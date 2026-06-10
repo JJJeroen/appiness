@@ -147,6 +147,26 @@ These were identified in the same review but deferred:
 
 ---
 
+## [2026-06-10] Mission set merged to 73 — originals + unique homebrew
+
+**Decision:** Replace the 40 handwritten missions with a merged set of 73 missions.
+
+**Sources:**
+- Original 52 missions from `import.sql` (53 original records minus #43 "Make love to someone" / "Vrij met iemand", cut for appropriateness in a general-audience app)
+- 21 unique missions from the homebrew set that had no equivalent in the originals
+
+**What was cut from homebrew:** ~19 missions that were functionally equivalent to originals (hold door, smile to stranger, give compliment, pick up litter, donate clothes, let someone go first, listen sincerely, do someone's task, call a friend, make someone laugh, keep phone stowed, etc.)
+
+**What the originals add:** Highly specific, concrete acts that the homebrew set lacked — wash a neighbour's car, place gift at doorstep, pick up a fallen bike, windshield wiper note, print and hang a photo, dance with someone, visit/keep in touch with/help an elderly person, discuss life without someone you love. These are distinctive and memorable.
+
+**What the homebrew adds:** Modern digital kindness (pay for coffee anonymously, write a positive review, send a photo that reminded you of someone) + emotionally harder acts (apologize to someone you've wronged, let go of a grudge, be first to break the ice, choose understanding over being right).
+
+**Why cut #43:** Consent and context cannot be assumed. The mission is unsuitable for a general-audience well-being app.
+
+**Category/difficulty tagging:** All originals were tagged during merge. Difficulty encodes emotional effort and social friction, not time commitment.
+
+---
+
 ## [2026-06-10] TypeScript from the start
 
 **Decision:** Full TypeScript, strict mode.
