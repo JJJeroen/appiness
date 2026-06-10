@@ -20,6 +20,29 @@ const UNDO_WINDOW_MS = 5000;
 
 type Milestone = { type: 'streak' | 'total'; value: number };
 
+type PlantState = 'seedling' | 'sprout' | 'plant' | 'flowering';
+
+function getPlantState(total: number): PlantState {
+  if (total >= 50) return 'flowering';
+  if (total >= 25) return 'plant';
+  if (total >= 10) return 'sprout';
+  return 'seedling';
+}
+
+const PLANT_ICONS: Record<PlantState, { name: 'nutrition-outline' | 'nutrition' | 'leaf-outline' | 'leaf'; size: number; opacity: number }> = {
+  seedling:  { name: 'nutrition-outline', size: 32, opacity: 0.55 },
+  sprout:    { name: 'nutrition',         size: 40, opacity: 0.70 },
+  plant:     { name: 'leaf-outline',      size: 48, opacity: 0.85 },
+  flowering: { name: 'leaf',              size: 56, opacity: 1.0  },
+};
+
+const PLANT_LABELS: Record<PlantState, { en: string; nl: string }> = {
+  seedling:  { en: 'Seedling',    nl: 'Zaailing'  },
+  sprout:    { en: 'Sprout',      nl: 'Spruit'    },
+  plant:     { en: 'Plant',       nl: 'Plant'     },
+  flowering: { en: 'Flourishing', nl: 'Bloeiend'  },
+};
+
 const STREAK_MILESTONES = new Set([7, 14, 30, 50, 100]);
 const TOTAL_MILESTONES = new Set([10, 25, 50, 73, 90]);
 
@@ -327,6 +350,18 @@ function CompletedTodayView({
               <Text style={styles.streakLargeNumber}>{streak}</Text>
             </View>
           )}
+          {!deferred && (() => {
+            const state = getPlantState(totalCompletions);
+            const icon = PLANT_ICONS[state];
+            const label = PLANT_LABELS[state][locale];
+            return (
+              <View style={styles.plantContainer}>
+                <Ionicons name={icon.name} size={icon.size} color={`rgba(255,255,255,${icon.opacity})`} />
+                <Text style={[styles.plantLabel, { opacity: icon.opacity }]}>{label}</Text>
+              </View>
+            );
+          })()}
+
           {milestone && !deferred && (
             <View style={styles.milestoneBanner}>
               <Text style={styles.milestoneValue}>{milestone.value}</Text>
@@ -568,6 +603,19 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: colors.text,
   },
+  plantContainer: {
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 4,
+  },
+  plantLabel: {
+    fontSize: 13,
+    fontWeight: '500',
+    color: colors.text,
+    letterSpacing: 0.8,
+    textTransform: 'uppercase',
+  },
+
   milestoneBanner: {
     alignItems: 'center',
     backgroundColor: 'rgba(255,255,255,0.12)',

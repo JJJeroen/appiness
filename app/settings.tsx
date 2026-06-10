@@ -39,6 +39,10 @@ const copy = {
       community:     'Community',
       self:          'Self',
     } as Record<Category, string>,
+    legendSection: 'Colour guide',
+    diffEasy:      'Light tint = easier mission',
+    diffMedium:    'Medium tint = moderate',
+    diffHard:      'Dark tint = more effort',
   },
   nl: {
     title:         'Instellingen',
@@ -55,6 +59,10 @@ const copy = {
       community:     'Gemeenschap',
       self:          'Zelf',
     } as Record<Category, string>,
+    legendSection: 'Kleuruitleg',
+    diffEasy:      'Lichte tint = makkelijkere missie',
+    diffMedium:    'Middeltint = gematigd',
+    diffHard:      'Donkere tint = meer inspanning',
   },
 };
 
@@ -187,6 +195,31 @@ export default function SettingsScreen() {
               );
             })}
           </View>
+
+          {/* Colour legend */}
+          <Text style={styles.sectionLabel}>{t.legendSection}</Text>
+          <View style={styles.legendGrid}>
+            {ALL_CATEGORIES.map((cat) => (
+              <View key={cat} style={styles.legendRow}>
+                <View style={[styles.legendSwatch, { backgroundColor: CATEGORY_COLORS[cat] }]} />
+                <Text style={styles.legendCatLabel}>{t.catLabels[cat]}</Text>
+              </View>
+            ))}
+          </View>
+          <View style={styles.difficultyHint}>
+            <View style={styles.diffRow}>
+              <View style={[styles.diffDot, { backgroundColor: 'rgba(255,255,255,0.6)' }]} />
+              <Text style={styles.diffLabel}>{t.diffEasy}</Text>
+            </View>
+            <View style={styles.diffRow}>
+              <View style={[styles.diffDot, { backgroundColor: 'rgba(255,255,255,0.85)' }]} />
+              <Text style={styles.diffLabel}>{t.diffMedium}</Text>
+            </View>
+            <View style={styles.diffRow}>
+              <View style={[styles.diffDot, { backgroundColor: 'rgba(255,255,255,1.0)' }]} />
+              <Text style={styles.diffLabel}>{t.diffHard}</Text>
+            </View>
+          </View>
         </ScrollView>
       </SafeAreaView>
     </LinearGradient>
@@ -256,4 +289,13 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255,255,255,0.6)',
   },
   toggleText: { color: colors.text, fontSize: 13, fontWeight: '700' },
+
+  legendGrid: { gap: 10, marginBottom: 16 },
+  legendRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  legendSwatch: { width: 20, height: 20, borderRadius: 4 },
+  legendCatLabel: { ...typography.tip, color: colors.text, fontSize: 15 },
+  difficultyHint: { gap: 8 },
+  diffRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  diffDot: { width: 10, height: 10, borderRadius: 5 },
+  diffLabel: { color: colors.textMuted, fontSize: 14 },
 });
