@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { getLocales } from 'expo-localization';
+import { useFocusEffect } from 'expo-router';
 import { getLanguagePreference } from '../services/SettingsService';
 
 export type Locale = 'nl' | 'en';
 
-function deviceLocale(): Locale {
+export function deviceLocale(): Locale {
   const code = getLocales()[0]?.languageCode ?? 'en';
   return code === 'nl' ? 'nl' : 'en';
 }
@@ -14,15 +15,18 @@ export function getLocale(): Locale {
   return deviceLocale();
 }
 
-// Hook — reads stored preference on mount; falls back to device locale
+// Hook — reads stored preference on mount and whenever the screen regains focus
 export function useLocale(): Locale {
   const [locale, setLocale] = useState<Locale>(deviceLocale());
 
-  useEffect(() => {
+  const readPref = useCallback(() => {
     getLanguagePreference().then((pref) => {
-      if (pref !== 'auto') setLocale(pref);
+      setLocale(pref === 'auto' ? deviceLocale() : pref);
     });
   }, []);
+
+  useEffect(() => { readPref(); }, [readPref]);
+  useFocusEffect(readPref);
 
   return locale;
 }

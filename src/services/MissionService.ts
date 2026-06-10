@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import missionsData from '../data/missions.json';
 import { Category, Difficulty } from '../theme';
-import { getEnabledCategories } from './SettingsService';
+import { getEnabledCategories, getDevMode } from './SettingsService';
 
 export type Mission = {
   id: number;
@@ -114,24 +114,28 @@ async function assignNewTodaysMission(): Promise<Mission> {
 // ─── Public API ──────────────────────────────────────────────────────────────
 
 // Returns null if the user has already completed today's mission.
+// In dev mode, always returns the next mission (bypasses the daily gate).
 export async function getTodaysMission(): Promise<Mission | null> {
   try {
     const today = todayStr();
+    const devMode = await getDevMode();
 
-    // Already completed today — no mission until tomorrow
+    // Already completed today — no mission until tomorrow (bypassed in dev mode)
     const lastCompleted = await AsyncStorage.getItem(KEYS.lastCompletedDate);
-    if (lastCompleted === today) return null;
+    if (!devMode && lastCompleted === today) return null;
 
-    // Mission already assigned today — return it
-    const lastAssigned = await AsyncStorage.getItem(KEYS.lastAssignedDate);
-    const storedIdRaw = await AsyncStorage.getItem(KEYS.todaysMissionId);
-    if (lastAssigned === today && storedIdRaw !== null) {
-      const id = JSON.parse(storedIdRaw) as number;
-      const found = missions.find((m) => m.id === id);
-      if (found) return found;
+    // Mission already assigned today — return it (skip cache in dev mode to get fresh mission)
+    if (!devMode) {
+      const lastAssigned = await AsyncStorage.getItem(KEYS.lastAssignedDate);
+      const storedIdRaw = await AsyncStorage.getItem(KEYS.todaysMissionId);
+      if (lastAssigned === today && storedIdRaw !== null) {
+        const id = JSON.parse(storedIdRaw) as number;
+        const found = missions.find((m) => m.id === id);
+        if (found) return found;
+      }
     }
 
-    // New day or no assignment yet
+    // New day, dev mode, or no assignment yet
     return assignNewTodaysMission();
   } catch {
     return assignNewTodaysMission();
@@ -291,6 +295,8 @@ export async function deferMission(missionId: number): Promise<void> {
 
 export async function isDeferredToday(): Promise<boolean> {
   try {
+    const devMode = await getDevMode();
+    if (devMode) return false;
     const raw = await AsyncStorage.getItem(KEYS.deferredToday);
     return raw === todayStr();
   } catch {

@@ -5,6 +5,7 @@ const KEYS = {
   notificationHour:  '@appiness/settings/notificationHour',
   enabledCategories: '@appiness/settings/enabledCategories',
   language:          '@appiness/settings/language',
+  devMode:           '@appiness/settings/devMode',
 };
 
 export const ALL_CATEGORIES: Category[] = ['relationships', 'others', 'community', 'self'];
@@ -46,4 +47,15 @@ export async function getLanguagePreference(): Promise<LanguagePreference> {
 
 export async function setLanguagePreference(lang: LanguagePreference): Promise<void> {
   await AsyncStorage.setItem(KEYS.language, lang);
+}
+
+export async function getDevMode(): Promise<boolean> {
+  try {
+    const raw = await AsyncStorage.getItem(KEYS.devMode);
+    return raw === 'true';
+  } catch { return false; }
+}
+
+export async function setDevMode(on: boolean): Promise<void> {
+  await AsyncStorage.setItem(KEYS.devMode, on ? 'true' : 'false');
 }

@@ -7,12 +7,13 @@ import {
   getNotificationHour, setNotificationHour,
   getEnabledCategories, setEnabledCategories,
   getLanguagePreference, setLanguagePreference,
+  getDevMode, setDevMode,
   ALL_CATEGORIES, LanguagePreference,
 } from '../src/services/SettingsService';
 import { scheduleDailyReminder } from '../src/services/NotificationService';
 import * as Notifications from 'expo-notifications';
 import { getGradient, colors, typography, Category } from '../src/theme';
-import { useLocale } from '../src/hooks/useLocale';
+import { deviceLocale, Locale } from '../src/hooks/useLocale';
 
 const NOTIFICATION_HOURS = [7, 9, 12, 18, 21];
 
@@ -67,26 +68,30 @@ const copy = {
 };
 
 export default function SettingsScreen() {
-  const locale = useLocale();
-  const t = copy[locale];
-
   const [langPref, setLangPref] = useState<LanguagePreference>('auto');
   const [notifHour, setNotifHour] = useState<number | null>(null); // null = off
   const [notifGranted, setNotifGranted] = useState(false);
   const [enabledCats, setEnabledCats] = useState<Category[]>([...ALL_CATEGORIES]);
+  const [devMode, setDevModeState] = useState(false);
+
+  // Derive locale directly from langPref so language pills flip the UI immediately
+  const locale: Locale = langPref === 'nl' ? 'nl' : langPref === 'en' ? 'en' : deviceLocale();
+  const t = copy[locale];
 
   useEffect(() => {
     (async () => {
-      const [pref, hour, cats, { status }] = await Promise.all([
+      const [pref, hour, cats, { status }, dev] = await Promise.all([
         getLanguagePreference(),
         getNotificationHour(),
         getEnabledCategories(),
         Notifications.getPermissionsAsync(),
+        getDevMode(),
       ]);
       setLangPref(pref);
       setNotifHour(status === 'granted' ? hour : null);
       setNotifGranted(status === 'granted');
       setEnabledCats(cats);
+      setDevModeState(dev);
     })();
   }, []);
 
@@ -104,6 +109,11 @@ export default function SettingsScreen() {
   const handleNotifOff = async () => {
     setNotifHour(null);
     await Notifications.cancelAllScheduledNotificationsAsync();
+  };
+
+  const handleDevMode = async (on: boolean) => {
+    setDevModeState(on);
+    await setDevMode(on);
   };
 
   const handleToggleCategory = async (cat: Category) => {
@@ -220,6 +230,22 @@ export default function SettingsScreen() {
               <Text style={styles.diffLabel}>{t.diffHard}</Text>
             </View>
           </View>
+          {/* Developer */}
+          <Text style={[styles.sectionLabel, styles.devLabel]}>Developer</Text>
+          <View style={styles.catList}>
+            <TouchableOpacity
+              style={styles.catRow}
+              onPress={() => handleDevMode(!devMode)}
+              activeOpacity={0.75}
+            >
+              <Text style={[styles.catLabel, { flex: 1 }]}>
+                {locale === 'nl' ? 'Meerdere missies per dag' : 'Multiple missions per day'}
+              </Text>
+              <View style={[styles.toggle, devMode && styles.toggleOn]}>
+                <Text style={styles.toggleText}>{devMode ? '✓' : ''}</Text>
+              </View>
+            </TouchableOpacity>
+          </View>
         </ScrollView>
       </SafeAreaView>
     </LinearGradient>
@@ -298,4 +324,6 @@ const styles = StyleSheet.create({
   diffRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   diffDot: { width: 10, height: 10, borderRadius: 5 },
   diffLabel: { color: colors.textMuted, fontSize: 14 },
+
+  devLabel: { opacity: 0.4, marginTop: 40 },
 });
