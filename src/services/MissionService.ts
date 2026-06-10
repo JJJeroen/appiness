@@ -27,10 +27,11 @@ const KEYS = {
   lastAssignedDate:      '@appiness/lastAssignedDate',
   lastCompletedDate:     '@appiness/lastCompletedDate',
   streak:                '@appiness/streak',
+  bestStreak:            '@appiness/bestStreak',
   totalCompletions:      '@appiness/totalCompletions',
   notificationPrompted:  '@appiness/notificationPrompted',
   streakFreezes:         '@appiness/streakFreezes',
-  deferredToday:         '@appiness/deferredToday',  // ISO date if user deferred today
+  deferredToday:         '@appiness/deferredToday',
 };
 
 const MAX_SKIPS = 2;
@@ -184,6 +185,10 @@ export async function completeMission(missionId: number): Promise<void> {
       await AsyncStorage.setItem(KEYS.streak, JSON.stringify(next));
       await AsyncStorage.setItem(KEYS.lastCompletedDate, today);
 
+      // Update best streak
+      const best = await getBestStreak();
+      if (next > best) await AsyncStorage.setItem(KEYS.bestStreak, JSON.stringify(next));
+
       // Award a freeze at every 7-day streak milestone
       if (next > 0 && next % 7 === 0) {
         const currentFreezes = await getStreakFreezes();
@@ -251,6 +256,15 @@ export async function getHistory(): Promise<(CompletedEntry & { mission: Mission
     }));
   } catch {
     return [];
+  }
+}
+
+export async function getBestStreak(): Promise<number> {
+  try {
+    const raw = await AsyncStorage.getItem(KEYS.bestStreak);
+    return raw ? JSON.parse(raw) : 0;
+  } catch {
+    return 0;
   }
 }
 

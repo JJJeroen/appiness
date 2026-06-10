@@ -297,6 +297,7 @@ function CompletedTodayView({
           ? `${streak} days in a row. Come back tomorrow for your next mission.`
           : 'Come back tomorrow for your next mission.',
       history: 'See history',
+      stats: 'Stats',
       notifQuestion: 'Want a daily reminder?',
       notifYes: 'Enable notifications',
       notifNo: 'No thanks',
@@ -309,6 +310,7 @@ function CompletedTodayView({
           ? `${streak} dagen op rij. Kom morgen terug voor je volgende missie.`
           : 'Kom morgen terug voor je volgende missie.',
       history: 'Bekijk historie',
+      stats: 'Statistieken',
       notifQuestion: 'Wil je een dagelijkse herinnering?',
       notifYes: 'Meldingen inschakelen',
       notifNo: 'Nee bedankt',
@@ -351,9 +353,14 @@ function CompletedTodayView({
               </TouchableOpacity>
             </View>
           ) : (
-            <TouchableOpacity onPress={() => router.push('/history')} style={styles.historyLink}>
-              <Text style={styles.historyLinkText}>{copy.history}</Text>
-            </TouchableOpacity>
+            <View style={styles.completedLinks}>
+              <TouchableOpacity onPress={() => router.push('/history')} style={styles.historyLink}>
+                <Text style={styles.historyLinkText}>{copy.history}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => router.push('/stats')} style={styles.statsLinkButton}>
+                <Text style={styles.statsLinkText}>{copy.stats}</Text>
+              </TouchableOpacity>
+            </View>
           )}
         </View>
       </SafeAreaView>
@@ -600,20 +607,29 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 28,
   },
-  historyLink: {
+  completedLinks: {
     marginTop: 16,
+    alignItems: 'center',
+    gap: 10,
+    width: '100%',
+  },
+  historyLink: {
+    width: '100%',
     paddingHorizontal: 24,
     paddingVertical: 12,
     backgroundColor: colors.doneBg,
     borderRadius: 12,
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.25)',
+    alignItems: 'center',
   },
   historyLinkText: {
     ...typography.button,
     color: colors.text,
     fontSize: 16,
   },
+  statsLinkButton: { paddingVertical: 6 },
+  statsLinkText: { color: colors.textMuted, fontSize: 15, fontWeight: '500' },
   notifPrompt: {
     marginTop: 24,
     alignItems: 'center',

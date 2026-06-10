@@ -5,9 +5,16 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { getHistory, CompletedEntry, Mission } from '../src/services/MissionService';
 import { useLocale } from '../src/hooks/useLocale';
-import { getGradient, colors, typography } from '../src/theme';
+import { getGradient, colors, typography, Category } from '../src/theme';
 
 type HistoryEntry = CompletedEntry & { mission: Mission };
+
+const CATEGORY_COLORS: Record<Category, string> = {
+  relationships: '#C4956A',
+  others:        '#C17A74',
+  community:     '#7A9E9F',
+  self:          '#9B8BBB',
+};
 
 function formatDate(iso: string): string {
   const d = new Date(iso);
@@ -33,7 +40,12 @@ export default function HistoryScreen() {
           <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
             <Text style={styles.backText}>← {locale === 'nl' ? 'Terug' : 'Back'}</Text>
           </TouchableOpacity>
-          <Text style={styles.title}>{locale === 'nl' ? 'Historie' : 'History'}</Text>
+          <View style={styles.titleRow}>
+            <Text style={styles.title}>{locale === 'nl' ? 'Historie' : 'History'}</Text>
+            <TouchableOpacity onPress={() => router.push('/stats')} style={styles.statsLink}>
+              <Text style={styles.statsLinkText}>{locale === 'nl' ? 'Statistieken' : 'Stats'}</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         {history.length === 0 ? (
@@ -47,6 +59,9 @@ export default function HistoryScreen() {
             contentContainerStyle={styles.list}
             renderItem={({ item }) => (
               <View style={styles.row}>
+                <View
+                  style={[styles.categoryBar, { backgroundColor: CATEGORY_COLORS[item.mission.category] }]}
+                />
                 <Text style={styles.date}>{formatDate(item.completionDate)}</Text>
                 <Text style={styles.mission} numberOfLines={2}>
                   {locale === 'nl' ? item.mission.missionNL : item.mission.missionEN}
@@ -65,40 +80,33 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   safe: { flex: 1, paddingHorizontal: 24 },
 
-  header: {
-    paddingTop: 12,
-    paddingBottom: 20,
-  },
+  header: { paddingTop: 12, paddingBottom: 20 },
   backButton: { marginBottom: 16 },
-  backText: {
-    color: colors.textMuted,
-    fontSize: 15,
-    fontWeight: '500',
+  backText: { color: colors.textMuted, fontSize: 15, fontWeight: '500' },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    justifyContent: 'space-between',
   },
-  title: {
-    fontSize: 32,
-    fontWeight: '700',
-    color: colors.text,
-    letterSpacing: 0.3,
-  },
+  title: { fontSize: 32, fontWeight: '700', color: colors.text, letterSpacing: 0.3 },
+  statsLink: { paddingBottom: 4 },
+  statsLinkText: { color: colors.textMuted, fontSize: 15, fontWeight: '500' },
 
-  emptyContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  emptyText: {
-    ...typography.tip,
-    color: colors.textMuted,
-    textAlign: 'center',
-  },
+  emptyContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  emptyText: { ...typography.tip, color: colors.textMuted, textAlign: 'center' },
 
   list: { paddingBottom: 32 },
   row: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    gap: 16,
+    gap: 12,
     paddingVertical: 12,
+  },
+  categoryBar: {
+    width: 3,
+    borderRadius: 2,
+    alignSelf: 'stretch',
+    minHeight: 20,
   },
   date: {
     color: colors.textMuted,
@@ -112,8 +120,5 @@ const styles = StyleSheet.create({
     ...typography.tip,
     color: colors.text,
   },
-  separator: {
-    height: 1,
-    backgroundColor: 'rgba(255,255,255,0.1)',
-  },
+  separator: { height: 1, backgroundColor: 'rgba(255,255,255,0.08)' },
 });
