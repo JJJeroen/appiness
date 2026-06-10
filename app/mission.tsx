@@ -18,6 +18,37 @@ import { requestAndSchedule } from '../src/services/NotificationService';
 
 const UNDO_WINDOW_MS = 5000;
 
+type Milestone = { type: 'streak' | 'total'; value: number };
+
+const STREAK_MILESTONES = new Set([7, 14, 30, 50, 100]);
+const TOTAL_MILESTONES = new Set([10, 25, 50, 73, 90]);
+
+function detectMilestone(streak: number, total: number): Milestone | null {
+  if (STREAK_MILESTONES.has(streak)) return { type: 'streak', value: streak };
+  if (TOTAL_MILESTONES.has(total)) return { type: 'total', value: total };
+  return null;
+}
+
+const STREAK_COPY: Record<number, { en: string; nl: string }> = {
+  7:   { en: 'days in a row. A streak freeze has been added.', nl: 'dagen op rij. Een streak-freeze is toegevoegd.' },
+  14:  { en: 'days in a row. A habit is forming.', nl: 'dagen op rij. Een gewoonte is aan het ontstaan.' },
+  30:  { en: 'days in a row. A real commitment.', nl: 'dagen op rij. Een echte toewijding.' },
+  50:  { en: 'days in a row. Remarkable.', nl: 'dagen op rij. Opmerkelijk.' },
+  100: { en: 'days in a row.', nl: 'dagen op rij.' },
+};
+const TOTAL_COPY: Record<number, { en: string; nl: string }> = {
+  10:  { en: 'missions done. You\'re finding your footing.', nl: 'missies gedaan. Je vindt je weg.' },
+  25:  { en: 'missions done. Kindness is becoming natural.', nl: 'missies gedaan. Vriendelijkheid wordt vanzelfsprekend.' },
+  50:  { en: 'missions done. Halfway through the pool.', nl: 'missies gedaan. Halverwege de pool.' },
+  73:  { en: 'missions done. A full cycle.', nl: 'missies gedaan. Een volledige ronde.' },
+  90:  { en: 'missions done. Every single one.', nl: 'missies gedaan. Elke missie voltooid.' },
+};
+
+function getMilestoneLine(m: Milestone, locale: 'nl' | 'en'): string {
+  const map = m.type === 'streak' ? STREAK_COPY : TOTAL_COPY;
+  return map[m.value]?.[locale] ?? '';
+}
+
 export default function MissionScreen() {
   const locale = useLocale();
   const [mission, setMission] = useState<Mission | null | undefined>(undefined);
@@ -30,7 +61,10 @@ export default function MissionScreen() {
   const [showUndo, setShowUndo] = useState(false);
   const [isDeferred, setIsDeferred] = useState(false);
   const [freezes, setFreezes] = useState(0);
+  const [lastCompletedMission, setLastCompletedMission] = useState<Mission | null>(null);
+  const [milestone, setMilestone] = useState<Milestone | null>(null);
   const undoTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pendingMilestone = useRef<Milestone | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -61,17 +95,23 @@ export default function MissionScreen() {
   const handleDone = async () => {
     if (!mission || submitting) return;
     setSubmitting(true);
+    setLastCompletedMission(mission);
     await completeMission(mission.id);
+    const [newStreak, newTotal] = await Promise.all([getStreak(), getTotalCompletions()]);
+    pendingMilestone.current = detectMilestone(newStreak, newTotal);
     setShowUndo(true);
     undoTimeout.current = setTimeout(() => {
       setShowUndo(false);
+      setMilestone(pendingMilestone.current);
       load();
     }, UNDO_WINDOW_MS);
   };
 
   const handleUndo = async () => {
     if (undoTimeout.current) clearTimeout(undoTimeout.current);
+    pendingMilestone.current = null;
     setShowUndo(false);
+    setMilestone(null);
     await undoLastCompletion();
     load();
   };
@@ -109,6 +149,8 @@ export default function MissionScreen() {
         streak={streak}
         totalCompletions={totalCompletions}
         onNotificationPromptHandled={load}
+        lastMissionText={lastCompletedMission ? (locale === 'nl' ? lastCompletedMission.missionNL : lastCompletedMission.missionEN) : undefined}
+        milestone={milestone}
       />
     );
   }
@@ -212,12 +254,15 @@ export default function MissionScreen() {
 
 function CompletedTodayView({
   locale, streak, totalCompletions, onNotificationPromptHandled, deferred = false,
+  lastMissionText, milestone,
 }: {
   locale: 'nl' | 'en';
   streak: number;
   totalCompletions: number;
   onNotificationPromptHandled: () => void;
   deferred?: boolean;
+  lastMissionText?: string;
+  milestone?: Milestone | null;
 }) {
   const [showNotifPrompt, setShowNotifPrompt] = useState(false);
   const gradient = getGradient('self', 'medium');
@@ -280,7 +325,19 @@ function CompletedTodayView({
               <Text style={styles.streakLargeNumber}>{streak}</Text>
             </View>
           )}
+          {milestone && !deferred && (
+            <View style={styles.milestoneBanner}>
+              <Text style={styles.milestoneValue}>{milestone.value}</Text>
+              <Text style={styles.milestoneLine}>{getMilestoneLine(milestone, locale)}</Text>
+            </View>
+          )}
+
           <Text style={styles.completedTitle}>{copy.well}</Text>
+
+          {lastMissionText && !deferred && (
+            <Text style={styles.completedMissionQuote}>{lastMissionText}</Text>
+          )}
+
           <Text style={styles.completedBody}>{copy.body}</Text>
 
           {showNotifPrompt ? (
@@ -504,11 +561,38 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: colors.text,
   },
+  milestoneBanner: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.12)',
+    borderRadius: 16,
+    paddingVertical: 16,
+    paddingHorizontal: 24,
+    width: '100%',
+    gap: 4,
+  },
+  milestoneValue: {
+    fontSize: 48,
+    fontWeight: '700',
+    color: colors.text,
+    lineHeight: 54,
+  },
+  milestoneLine: {
+    ...typography.tip,
+    color: colors.textMuted,
+    textAlign: 'center',
+  },
   completedTitle: {
     fontSize: 32,
     fontWeight: '700',
     color: colors.text,
     textAlign: 'center',
+  },
+  completedMissionQuote: {
+    ...typography.tip,
+    color: 'rgba(255,255,255,0.5)',
+    textAlign: 'center',
+    fontStyle: 'italic',
+    paddingHorizontal: 12,
   },
   completedBody: {
     ...typography.tip,
