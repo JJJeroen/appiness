@@ -1,8 +1,11 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import missionsData from '../data/missions.json';
+import { Category, Difficulty } from '../theme';
 
 export type Mission = {
   id: number;
+  category: Category;
+  difficulty: Difficulty;
   missionEN: string;
   missionNL: string;
   hintEN: string;

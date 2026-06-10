@@ -9,19 +9,47 @@ export const colors = {
   tip: 'rgba(255,255,255,0.15)',
 };
 
-// Each gradient is a [top, bottom] pair — warm, human tones
-export const gradients: [string, string][] = [
-  ['#C17A74', '#7A3E3E'], // terracotta
-  ['#7A9E9F', '#3D6B6C'], // sage teal
-  ['#9B8BBB', '#5C4A7A'], // dusty purple
-  ['#C4956A', '#7A5535'], // warm amber
-  ['#7A9E7E', '#3D6B47'], // sage green
-  ['#A07B9B', '#5C3F6B'], // mauve
-  ['#7A8FAE', '#3D5A7A'], // slate blue
-  ['#C4A06A', '#7A5E35'], // golden
-  ['#9E7A7A', '#6B3D3D'], // rose brown
-  ['#7A9E9B', '#3D6B68'], // seafoam
-];
+export type Category = 'others' | 'relationships' | 'community' | 'self';
+export type Difficulty = 'easy' | 'medium' | 'hard';
+
+// Colour families encode meaning:
+//   others        → terracotta  (warmth toward strangers)
+//   relationships → amber/gold  (warmth toward close people)
+//   community     → teal/sage   (environment, shared spaces)
+//   self          → mauve       (reflection, inner work)
+// Lightness encodes effort:
+//   easy → lighter/warmer   medium → mid-tone   hard → deeper/richer
+const gradientMap: Record<Category, Record<Difficulty, [string, string]>> = {
+  others: {
+    easy:   ['#D4948E', '#A05A54'],
+    medium: ['#C17A74', '#7A3E3E'],
+    hard:   ['#8B4A44', '#5A2020'],
+  },
+  relationships: {
+    easy:   ['#D4B080', '#A07040'],
+    medium: ['#C4956A', '#7A5535'],
+    hard:   ['#8B6535', '#5A3A15'],
+  },
+  community: {
+    easy:   ['#8FBEAF', '#4A8070'],
+    medium: ['#7A9E9F', '#3D6B6C'],
+    hard:   ['#4A7070', '#1A4040'],
+  },
+  self: {
+    easy:   ['#BBA8CC', '#8070A0'],
+    medium: ['#9B8BBB', '#5C4A7A'],
+    hard:   ['#6A5085', '#3A2A55'],
+  },
+};
+
+export function getGradient(category: Category, difficulty: Difficulty): [string, string] {
+  return gradientMap[category][difficulty];
+}
+
+// Kept for the history screen fallback
+export const gradients: [string, string][] = Object.values(gradientMap).flatMap(
+  (d) => Object.values(d) as [string, string][]
+);
 
 export const typography = {
   mission: {

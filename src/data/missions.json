@@ -1,282 +1,42 @@
 [
-  {
-    "id": 1,
-    "missionEN": "Give a genuine compliment to someone you don't know",
-    "missionNL": "Geef een oprecht compliment aan iemand die je niet kent",
-    "hintEN": "Think of something specific you notice — their style, their work, their attitude. One sentence is enough.",
-    "hintNL": "Denk aan iets wat je opvalt — hun stijl, hun werk, hun houding. Eén zin is genoeg."
-  },
-  {
-    "id": 2,
-    "missionEN": "Hold the door open for the next person behind you",
-    "missionNL": "Houd de deur open voor de volgende persoon achter je",
-    "hintEN": "Make eye contact and smile — that's what turns a habit into a human moment.",
-    "hintNL": "Maak oogcontact en glimlach — dat maakt van een gewoonte een menselijk moment."
-  },
-  {
-    "id": 3,
-    "missionEN": "Let someone go ahead of you in a queue or in traffic",
-    "missionNL": "Laat iemand voor je gaan in de rij of in het verkeer",
-    "hintEN": "It costs you almost nothing and can completely change someone's rushed morning.",
-    "hintNL": "Het kost je bijna niets en kan iemands gehaaste ochtend volledig veranderen."
-  },
-  {
-    "id": 4,
-    "missionEN": "Pick up a piece of litter you didn't drop",
-    "missionNL": "Raap een stuk afval op dat jij niet hebt neergegooid",
-    "hintEN": "Keep it simple — one piece near where you already are. No need to make it a project.",
-    "hintNL": "Houd het simpel — één stuk in de buurt van waar je al bent. Je hoeft er geen project van te maken."
-  },
-  {
-    "id": 5,
-    "missionEN": "Send a message to someone telling them what you appreciate about them",
-    "missionNL": "Stuur iemand een bericht waarin je vertelt wat je aan hem of haar waardeert",
-    "hintEN": "Think of someone who rarely hears it — a quiet colleague, a parent, an old friend. Be specific.",
-    "hintNL": "Denk aan iemand die het zelden hoort — een stille collega, een ouder, een oude vriend. Wees specifiek."
-  },
-  {
-    "id": 6,
-    "missionEN": "Pay for the coffee or snack of the person behind you in line",
-    "missionNL": "Betaal voor de koffie of snack van de persoon achter je in de rij",
-    "hintEN": "You don't need to explain why. Just say \"I've got this one\" and leave.",
-    "hintNL": "Je hoeft niet uit te leggen waarom. Zeg gewoon \"deze is voor mij\" en ga weg."
-  },
-  {
-    "id": 7,
-    "missionEN": "Reach out to someone you haven't spoken to in a while",
-    "missionNL": "Neem contact op met iemand met wie je al een tijdje niet hebt gesproken",
-    "hintEN": "A voice message feels more personal than a text. But a text is better than nothing.",
-    "hintNL": "Een spraakbericht voelt persoonlijker dan een sms. Maar een sms is beter dan niets."
-  },
-  {
-    "id": 8,
-    "missionEN": "Make at least one person genuinely laugh today",
-    "missionNL": "Zorg ervoor dat minimaal één persoon vandaag echt lacht",
-    "hintEN": "Share a funny memory, a meme, or just be silly. Laughter is contagious and free.",
-    "hintNL": "Deel een grappige herinnering, een meme, of doe gewoon gek. Lachen is aanstekelijk en gratis."
-  },
-  {
-    "id": 9,
-    "missionEN": "Give someone your undivided attention for 15 minutes — phone face down",
-    "missionNL": "Geef iemand 15 minuten je volledige aandacht — telefoon met het scherm naar beneden",
-    "hintEN": "Pick someone who deserves it — a partner, a child, a friend. Really listen.",
-    "hintNL": "Kies iemand die het verdient — een partner, een kind, een vriend. Luister echt."
-  },
-  {
-    "id": 10,
-    "missionEN": "Leave a handwritten note for someone that will brighten their day",
-    "missionNL": "Laat een handgeschreven briefje achter voor iemand dat hun dag opfleurt",
-    "hintEN": "Stick it on their desk, in their bag, or on the fridge. No need for perfect words.",
-    "hintNL": "Plak het op hun bureau, stop het in hun tas of hang het op de koelkast. Perfecte woorden zijn niet nodig."
-  },
-  {
-    "id": 11,
-    "missionEN": "Help someone with a task before they ask you",
-    "missionNL": "Help iemand met een taak voordat ze je vragen",
-    "hintEN": "Notice what someone is struggling with — carrying something, figuring something out — and just step in.",
-    "hintNL": "Merk op waarmee iemand moeite heeft — iets dragen, iets uitzoeken — en doe gewoon mee."
-  },
-  {
-    "id": 12,
-    "missionEN": "Smile genuinely at five strangers today",
-    "missionNL": "Glimlach vandaag oprecht naar vijf vreemden",
-    "hintEN": "A real smile reaches your eyes. It doesn't matter if they don't smile back.",
-    "hintNL": "Een echte glimlach bereikt je ogen. Het maakt niet uit of ze niet terug glimlachen."
-  },
-  {
-    "id": 13,
-    "missionEN": "Genuinely thank someone in a service role — cashier, driver, cleaner",
-    "missionNL": "Bedank oprecht iemand in een servicerol — kassamedewerker, chauffeur, schoonmaker",
-    "hintEN": "Use their name if they're wearing a badge. Make eye contact. Mean it.",
-    "hintNL": "Gebruik hun naam als ze een naamplaatje dragen. Maak oogcontact. Meen het."
-  },
-  {
-    "id": 14,
-    "missionEN": "Share something that inspired or moved you recently with someone else",
-    "missionNL": "Deel iets wat je recent heeft geïnspireerd of geraakt met iemand anders",
-    "hintEN": "A book, article, video, or even a conversation. Inspiration spreads when you share it.",
-    "hintNL": "Een boek, artikel, video of zelfs een gesprek. Inspiratie verspreidt zich als je het deelt."
-  },
-  {
-    "id": 15,
-    "missionEN": "Do a household chore that isn't typically your responsibility",
-    "missionNL": "Doe een huishoudelijke taak die normaal niet jouw verantwoordelijkheid is",
-    "hintEN": "Don't announce it. Just do it and let the result speak for itself.",
-    "hintNL": "Vertel het niet. Doe het gewoon en laat het resultaat voor zichzelf spreken."
-  },
-  {
-    "id": 16,
-    "missionEN": "Find one item you no longer need and donate or give it away",
-    "missionNL": "Zoek één item dat je niet meer nodig hebt en doneer of geef het weg",
-    "hintEN": "Clothes, books, kitchen items — whatever you've been holding on to \"just in case.\"",
-    "hintNL": "Kleding, boeken, keukenspullen — wat je ook hebt bewaard \"voor het geval dat.\""
-  },
-  {
-    "id": 17,
-    "missionEN": "Ask someone \"how are you really doing?\" and actually listen to the answer",
-    "missionNL": "Vraag iemand \"hoe gaat het echt met je?\" en luister echt naar het antwoord",
-    "hintEN": "Most people answer \"fine\" on autopilot. Your follow-up question opens the real conversation.",
-    "hintNL": "De meeste mensen antwoorden automatisch \"goed\". Jouw vervolgvraag opent het echte gesprek."
-  },
-  {
-    "id": 18,
-    "missionEN": "Cook or prepare food for someone else — not just yourself",
-    "missionNL": "Kook of bereid eten voor iemand anders — niet alleen voor jezelf",
-    "hintEN": "It doesn't have to be fancy. A simple meal made with care means more than a complicated one made in a rush.",
-    "hintNL": "Het hoeft niet indrukwekkend te zijn. Een eenvoudige maaltijd met zorg gemaakt betekent meer dan een ingewikkelde in haast."
-  },
-  {
-    "id": 19,
-    "missionEN": "Offer your seat to someone who needs it more than you",
-    "missionNL": "Bied je zitplaats aan aan iemand die het meer nodig heeft dan jij",
-    "hintEN": "On public transport, in a waiting room, anywhere. Don't wait to see if someone asks.",
-    "hintNL": "In het openbaar vervoer, in een wachtkamer, overal. Wacht niet af of iemand erom vraagt."
-  },
-  {
-    "id": 20,
-    "missionEN": "Write a positive review for a local business or independent creator you like",
-    "missionNL": "Schrijf een positieve recensie voor een lokaal bedrijf of onafhankelijke maker die je waardeert",
-    "hintEN": "Five stars and two genuine sentences can make a real difference for a small business.",
-    "hintNL": "Vijf sterren en twee oprechte zinnen kunnen een echt verschil maken voor kleine ondernemingen."
-  },
-  {
-    "id": 21,
-    "missionEN": "Ask someone about their background or culture and genuinely listen",
-    "missionNL": "Vraag iemand naar zijn of haar achtergrond of cultuur en luister oprecht",
-    "hintEN": "Curiosity is a form of respect. Ask one specific question and let them lead.",
-    "hintNL": "Nieuwsgierigheid is een vorm van respect. Stel één specifieke vraag en laat hen het gesprek leiden."
-  },
-  {
-    "id": 22,
-    "missionEN": "Apologize to someone you've wronged — even if it was a long time ago",
-    "missionNL": "Bied je excuses aan aan iemand die je onrecht hebt aangedaan — ook al was het lang geleden",
-    "hintEN": "A genuine apology has no \"but\" in it. Keep it simple and sincere.",
-    "hintNL": "Een oprechte verontschuldiging heeft geen \"maar\" erin. Houd het simpel en oprecht."
-  },
-  {
-    "id": 23,
-    "missionEN": "Spend at least 20 minutes outside in nature — without your phone",
-    "missionNL": "Breng minimaal 20 minuten buiten door in de natuur — zonder je telefoon",
-    "hintEN": "A park counts. Being still counts more than walking fast.",
-    "hintNL": "Een park telt mee. Stilstaan telt meer dan snel lopen."
-  },
-  {
-    "id": 24,
-    "missionEN": "Tell someone you believe in their goal or dream",
-    "missionNL": "Vertel iemand dat je in hun doel of droom gelooft",
-    "hintEN": "People often give up not because they failed, but because no one said \"I think you can do this.\"",
-    "hintNL": "Mensen geven vaak op niet omdat ze gefaald hebben, maar omdat niemand zei \"ik denk dat je dit kunt.\""
-  },
-  {
-    "id": 25,
-    "missionEN": "Connect two people in your life who would benefit from knowing each other",
-    "missionNL": "Verbind twee mensen in je leven die baat hebben bij het kennen van elkaar",
-    "hintEN": "Think about who has a problem and who has a solution. Or who just has overlapping interests.",
-    "hintNL": "Denk na over wie een probleem heeft en wie een oplossing heeft. Of wie gewoon overlappende interesses heeft."
-  },
-  {
-    "id": 26,
-    "missionEN": "Decide to let go of a grudge you've been holding",
-    "missionNL": "Besluit een wrok los te laten die je al een tijdje meedraagt",
-    "hintEN": "Forgiveness isn't about them. It's about freeing yourself from carrying that weight.",
-    "hintNL": "Vergeven gaat niet over hen. Het gaat erom jezelf te bevrijden van die last."
-  },
-  {
-    "id": 27,
-    "missionEN": "Do something kind today without anyone knowing it was you",
-    "missionNL": "Doe vandaag iets aardigs zonder dat iemand weet dat jij het was",
-    "hintEN": "Leave a gift, pay for something, fix a problem — then walk away. No credit needed.",
-    "hintNL": "Laat een cadeau achter, betaal voor iets, los een probleem op — en loop weg. Geen erkenning nodig."
-  },
-  {
-    "id": 28,
-    "missionEN": "Teach someone a skill or piece of knowledge you have",
-    "missionNL": "Leer iemand een vaardigheid of kennis die jij hebt",
-    "hintEN": "What do you know that others around you don't? Share it without making them feel small for not knowing.",
-    "hintNL": "Wat weet jij dat anderen om je heen niet weten? Deel het zonder hen klein te laten voelen voor het niet weten."
-  },
-  {
-    "id": 29,
-    "missionEN": "Practice patience with someone who is frustrating you today",
-    "missionNL": "Oefen geduld met iemand die je vandaag frustreert",
-    "hintEN": "Breathe. Consider what might be going on for them that you can't see.",
-    "hintNL": "Adem. Bedenk wat er bij hen speelt wat jij niet kunt zien."
-  },
-  {
-    "id": 30,
-    "missionEN": "Tidy up a shared space — office kitchen, communal area, street — without being asked",
-    "missionNL": "Ruim een gedeelde ruimte op — kantinekeuken, gemeenschappelijke ruimte, straat — zonder dat erom gevraagd wordt",
-    "hintEN": "The person who benefits might never know it was you. That's fine.",
-    "hintNL": "Degene die er baat bij heeft, weet misschien nooit dat jij het was. Dat is prima."
-  },
-  {
-    "id": 31,
-    "missionEN": "Let someone vent or talk without offering any advice — just listen",
-    "missionNL": "Laat iemand zijn hart luchten of praten zonder advies te geven — luister gewoon",
-    "hintEN": "Ask \"do you want me to listen or help solve it?\" Most people just want to be heard.",
-    "hintNL": "Vraag \"wil je dat ik luister of help oplossen?\" De meeste mensen willen gewoon gehoord worden."
-  },
-  {
-    "id": 32,
-    "missionEN": "Genuinely celebrate a success or achievement of someone in your life",
-    "missionNL": "Vier oprecht een succes of prestatie van iemand in je leven",
-    "hintEN": "Make it about them, not about your reaction. Say specifically what you admire.",
-    "hintNL": "Maak het over hen, niet over jouw reactie. Zeg specifiek wat je bewondert."
-  },
-  {
-    "id": 33,
-    "missionEN": "In a disagreement today, choose understanding over being right",
-    "missionNL": "Kies in een meningsverschil vandaag voor begrip in plaats van gelijk hebben",
-    "hintEN": "Ask one genuine question about their perspective before you respond. You might be surprised.",
-    "hintNL": "Stel één oprechte vraag over hun perspectief voordat je antwoordt. Je kunt verrast worden."
-  },
-  {
-    "id": 34,
-    "missionEN": "Acknowledge at least five people today with eye contact and a nod",
-    "missionNL": "Erken vandaag minimaal vijf mensen met oogcontact en een knikje",
-    "hintEN": "In a world of screens, simply being seen can mean a lot. You don't need words.",
-    "hintNL": "In een wereld van schermen kan simpelweg gezien worden veel betekenen. Je hebt geen woorden nodig."
-  },
-  {
-    "id": 35,
-    "missionEN": "Buy something from a local, independent shop instead of a chain",
-    "missionNL": "Koop iets bij een lokale, onafhankelijke winkel in plaats van een keten",
-    "hintEN": "The difference between a thriving local business and a closed one is often just a few loyal customers.",
-    "hintNL": "Het verschil tussen een bloeiend lokaal bedrijf en een gesloten winkel zijn vaak maar een paar vaste klanten."
-  },
-  {
-    "id": 36,
-    "missionEN": "Send someone a photo or something you saw today that reminded you of them",
-    "missionNL": "Stuur iemand een foto of iets wat je vandaag zag en dat je aan hen deed denken",
-    "hintEN": "It doesn't need context. \"Saw this, thought of you\" is enough.",
-    "hintNL": "Het heeft geen context nodig. \"Zag dit, moest aan je denken\" is genoeg."
-  },
-  {
-    "id": 37,
-    "missionEN": "In a tension or conflict, be the first one to break the ice",
-    "missionNL": "Wees in een spanning of conflict degene die als eerste het ijs breekt",
-    "hintEN": "Being first doesn't mean you were wrong. It means you value the relationship more than the argument.",
-    "hintNL": "Als eerste zijn betekent niet dat je ongelijk had. Het betekent dat je de relatie meer waardeert dan het argument."
-  },
-  {
-    "id": 38,
-    "missionEN": "Recommend a book, tool, or resource that genuinely helped you to someone who could use it",
-    "missionNL": "Beveel een boek, tool of bron aan die jou echt heeft geholpen aan iemand die er baat bij kan hebben",
-    "hintEN": "The best recommendations are personal — explain how it helped you, not just what it is.",
-    "hintNL": "De beste aanbevelingen zijn persoonlijk — leg uit hoe het jou hielp, niet alleen wat het is."
-  },
-  {
-    "id": 39,
-    "missionEN": "Spend one evening without screens — give that time to people or yourself",
-    "missionNL": "Breng één avond door zonder schermen — geef die tijd aan mensen of aan jezelf",
-    "hintEN": "Tell someone about it in advance so you can hold each other accountable.",
-    "hintNL": "Vertel iemand er van tevoren over zodat je elkaar kunt aansporen."
-  },
-  {
-    "id": 40,
-    "missionEN": "Tell three people today something you are genuinely grateful for about them",
-    "missionNL": "Vertel vandaag drie mensen iets waarvoor je hen echt dankbaar bent",
-    "hintEN": "Gratitude unexpressed is wasted. Say it out loud, not just in your head.",
-    "hintNL": "Niet uitgesproken dankbaarheid is verspild. Zeg het hardop, niet alleen in je hoofd."
-  }
+  { "id": 1,  "category": "others",        "difficulty": "easy",   "missionEN": "Give a genuine compliment to someone you don't know", "missionNL": "Geef een oprecht compliment aan iemand die je niet kent", "hintEN": "Think of something specific you notice — their style, their work, their attitude. One sentence is enough.", "hintNL": "Denk aan iets wat je opvalt — hun stijl, hun werk, hun houding. Eén zin is genoeg." },
+  { "id": 2,  "category": "others",        "difficulty": "easy",   "missionEN": "Hold the door open for the next person behind you", "missionNL": "Houd de deur open voor de volgende persoon achter je", "hintEN": "Make eye contact and smile — that's what turns a habit into a human moment.", "hintNL": "Maak oogcontact en glimlach — dat maakt van een gewoonte een menselijk moment." },
+  { "id": 3,  "category": "others",        "difficulty": "easy",   "missionEN": "Let someone go ahead of you in a queue or in traffic", "missionNL": "Laat iemand voor je gaan in de rij of in het verkeer", "hintEN": "It costs you almost nothing and can completely change someone's rushed morning.", "hintNL": "Het kost je bijna niets en kan iemands gehaaste ochtend volledig veranderen." },
+  { "id": 4,  "category": "community",     "difficulty": "easy",   "missionEN": "Pick up a piece of litter you didn't drop", "missionNL": "Raap een stuk afval op dat jij niet hebt neergegooid", "hintEN": "Keep it simple — one piece near where you already are. No need to make it a project.", "hintNL": "Houd het simpel — één stuk in de buurt van waar je al bent. Je hoeft er geen project van te maken." },
+  { "id": 5,  "category": "relationships", "difficulty": "easy",   "missionEN": "Send a message to someone telling them what you appreciate about them", "missionNL": "Stuur iemand een bericht waarin je vertelt wat je aan hem of haar waardeert", "hintEN": "Think of someone who rarely hears it — a quiet colleague, a parent, an old friend. Be specific.", "hintNL": "Denk aan iemand die het zelden hoort — een stille collega, een ouder, een oude vriend. Wees specifiek." },
+  { "id": 6,  "category": "others",        "difficulty": "medium", "missionEN": "Pay for the coffee or snack of the person behind you in line", "missionNL": "Betaal voor de koffie of snack van de persoon achter je in de rij", "hintEN": "You don't need to explain why. Just say \"I've got this one\" and leave.", "hintNL": "Je hoeft niet uit te leggen waarom. Zeg gewoon \"deze is voor mij\" en ga weg." },
+  { "id": 7,  "category": "relationships", "difficulty": "medium", "missionEN": "Reach out to someone you haven't spoken to in a while", "missionNL": "Neem contact op met iemand met wie je al een tijdje niet hebt gesproken", "hintEN": "A voice message feels more personal than a text. But a text is better than nothing.", "hintNL": "Een spraakbericht voelt persoonlijker dan een sms. Maar een sms is beter dan niets." },
+  { "id": 8,  "category": "relationships", "difficulty": "easy",   "missionEN": "Make at least one person genuinely laugh today", "missionNL": "Zorg ervoor dat minimaal één persoon vandaag echt lacht", "hintEN": "Share a funny memory, a meme, or just be silly. Laughter is contagious and free.", "hintNL": "Deel een grappige herinnering, een meme, of doe gewoon gek. Lachen is aanstekelijk en gratis." },
+  { "id": 9,  "category": "relationships", "difficulty": "medium", "missionEN": "Give someone your undivided attention for 15 minutes — phone face down", "missionNL": "Geef iemand 15 minuten je volledige aandacht — telefoon met het scherm naar beneden", "hintEN": "Pick someone who deserves it — a partner, a child, a friend. Really listen.", "hintNL": "Kies iemand die het verdient — een partner, een kind, een vriend. Luister echt." },
+  { "id": 10, "category": "relationships", "difficulty": "easy",   "missionEN": "Leave a handwritten note for someone that will brighten their day", "missionNL": "Laat een handgeschreven briefje achter voor iemand dat hun dag opfleurt", "hintEN": "Stick it on their desk, in their bag, or on the fridge. No need for perfect words.", "hintNL": "Plak het op hun bureau, stop het in hun tas of hang het op de koelkast. Perfecte woorden zijn niet nodig." },
+  { "id": 11, "category": "others",        "difficulty": "medium", "missionEN": "Help someone with a task before they ask you", "missionNL": "Help iemand met een taak voordat ze je vragen", "hintEN": "Notice what someone is struggling with — carrying something, figuring something out — and just step in.", "hintNL": "Merk op waarmee iemand moeite heeft — iets dragen, iets uitzoeken — en doe gewoon mee." },
+  { "id": 12, "category": "others",        "difficulty": "easy",   "missionEN": "Smile genuinely at five strangers today", "missionNL": "Glimlach vandaag oprecht naar vijf vreemden", "hintEN": "A real smile reaches your eyes. It doesn't matter if they don't smile back.", "hintNL": "Een echte glimlach bereikt je ogen. Het maakt niet uit of ze niet terug glimlachen." },
+  { "id": 13, "category": "others",        "difficulty": "easy",   "missionEN": "Genuinely thank someone in a service role — cashier, driver, cleaner", "missionNL": "Bedank oprecht iemand in een servicerol — kassamedewerker, chauffeur, schoonmaker", "hintEN": "Use their name if they're wearing a badge. Make eye contact. Mean it.", "hintNL": "Gebruik hun naam als ze een naamplaatje dragen. Maak oogcontact. Meen het." },
+  { "id": 14, "category": "relationships", "difficulty": "easy",   "missionEN": "Share something that inspired or moved you recently with someone else", "missionNL": "Deel iets wat je recent heeft geïnspireerd of geraakt met iemand anders", "hintEN": "A book, article, video, or even a conversation. Inspiration spreads when you share it.", "hintNL": "Een boek, artikel, video of zelfs een gesprek. Inspiratie verspreidt zich als je het deelt." },
+  { "id": 15, "category": "relationships", "difficulty": "easy",   "missionEN": "Do a household chore that isn't typically your responsibility", "missionNL": "Doe een huishoudelijke taak die normaal niet jouw verantwoordelijkheid is", "hintEN": "Don't announce it. Just do it and let the result speak for itself.", "hintNL": "Vertel het niet. Doe het gewoon en laat het resultaat voor zichzelf spreken." },
+  { "id": 16, "category": "community",     "difficulty": "easy",   "missionEN": "Find one item you no longer need and donate or give it away", "missionNL": "Zoek één item dat je niet meer nodig hebt en doneer of geef het weg", "hintEN": "Clothes, books, kitchen items — whatever you've been holding on to \"just in case.\"", "hintNL": "Kleding, boeken, keukenspullen — wat je ook hebt bewaard \"voor het geval dat.\"" },
+  { "id": 17, "category": "relationships", "difficulty": "medium", "missionEN": "Ask someone \"how are you really doing?\" and actually listen to the answer", "missionNL": "Vraag iemand \"hoe gaat het echt met je?\" en luister echt naar het antwoord", "hintEN": "Most people answer \"fine\" on autopilot. Your follow-up question opens the real conversation.", "hintNL": "De meeste mensen antwoorden automatisch \"goed\". Jouw vervolgvraag opent het echte gesprek." },
+  { "id": 18, "category": "relationships", "difficulty": "medium", "missionEN": "Cook or prepare food for someone else — not just yourself", "missionNL": "Kook of bereid eten voor iemand anders — niet alleen voor jezelf", "hintEN": "It doesn't have to be fancy. A simple meal made with care means more than a complicated one made in a rush.", "hintNL": "Het hoeft niet indrukwekkend te zijn. Een eenvoudige maaltijd met zorg gemaakt betekent meer dan een ingewikkelde in haast." },
+  { "id": 19, "category": "others",        "difficulty": "easy",   "missionEN": "Offer your seat to someone who needs it more than you", "missionNL": "Bied je zitplaats aan aan iemand die het meer nodig heeft dan jij", "hintEN": "On public transport, in a waiting room, anywhere. Don't wait to see if someone asks.", "hintNL": "In het openbaar vervoer, in een wachtkamer, overal. Wacht niet af of iemand erom vraagt." },
+  { "id": 20, "category": "community",     "difficulty": "easy",   "missionEN": "Write a positive review for a local business or independent creator you like", "missionNL": "Schrijf een positieve recensie voor een lokaal bedrijf of onafhankelijke maker die je waardeert", "hintEN": "Five stars and two genuine sentences can make a real difference for a small business.", "hintNL": "Vijf sterren en twee oprechte zinnen kunnen een echt verschil maken voor kleine ondernemingen." },
+  { "id": 21, "category": "others",        "difficulty": "medium", "missionEN": "Ask someone about their background or culture and genuinely listen", "missionNL": "Vraag iemand naar zijn of haar achtergrond of cultuur en luister oprecht", "hintEN": "Curiosity is a form of respect. Ask one specific question and let them lead.", "hintNL": "Nieuwsgierigheid is een vorm van respect. Stel één specifieke vraag en laat hen het gesprek leiden." },
+  { "id": 22, "category": "relationships", "difficulty": "hard",   "missionEN": "Apologize to someone you've wronged — even if it was a long time ago", "missionNL": "Bied je excuses aan aan iemand die je onrecht hebt aangedaan — ook al was het lang geleden", "hintEN": "A genuine apology has no \"but\" in it. Keep it simple and sincere.", "hintNL": "Een oprechte verontschuldiging heeft geen \"maar\" erin. Houd het simpel en oprecht." },
+  { "id": 23, "category": "self",          "difficulty": "easy",   "missionEN": "Spend at least 20 minutes outside in nature — without your phone", "missionNL": "Breng minimaal 20 minuten buiten door in de natuur — zonder je telefoon", "hintEN": "A park counts. Being still counts more than walking fast.", "hintNL": "Een park telt mee. Stilstaan telt meer dan snel lopen." },
+  { "id": 24, "category": "relationships", "difficulty": "easy",   "missionEN": "Tell someone you believe in their goal or dream", "missionNL": "Vertel iemand dat je in hun doel of droom gelooft", "hintEN": "People often give up not because they failed, but because no one said \"I think you can do this.\"", "hintNL": "Mensen geven vaak op niet omdat ze gefaald hebben, maar omdat niemand zei \"ik denk dat je dit kunt.\"" },
+  { "id": 25, "category": "relationships", "difficulty": "medium", "missionEN": "Connect two people in your life who would benefit from knowing each other", "missionNL": "Verbind twee mensen in je leven die baat hebben bij het kennen van elkaar", "hintEN": "Think about who has a problem and who has a solution. Or who just has overlapping interests.", "hintNL": "Denk na over wie een probleem heeft en wie een oplossing heeft. Of wie gewoon overlappende interesses heeft." },
+  { "id": 26, "category": "self",          "difficulty": "hard",   "missionEN": "Decide to let go of a grudge you've been holding", "missionNL": "Besluit een wrok los te laten die je al een tijdje meedraagt", "hintEN": "Forgiveness isn't about them. It's about freeing yourself from carrying that weight.", "hintNL": "Vergeven gaat niet over hen. Het gaat erom jezelf te bevrijden van die last." },
+  { "id": 27, "category": "others",        "difficulty": "medium", "missionEN": "Do something kind today without anyone knowing it was you", "missionNL": "Doe vandaag iets aardigs zonder dat iemand weet dat jij het was", "hintEN": "Leave a gift, pay for something, fix a problem — then walk away. No credit needed.", "hintNL": "Laat een cadeau achter, betaal voor iets, los een probleem op — en loop weg. Geen erkenning nodig." },
+  { "id": 28, "category": "relationships", "difficulty": "medium", "missionEN": "Teach someone a skill or piece of knowledge you have", "missionNL": "Leer iemand een vaardigheid of kennis die jij hebt", "hintEN": "What do you know that others around you don't? Share it without making them feel small for not knowing.", "hintNL": "Wat weet jij dat anderen om je heen niet weten? Deel het zonder hen klein te laten voelen voor het niet weten." },
+  { "id": 29, "category": "self",          "difficulty": "medium", "missionEN": "Practice patience with someone who is frustrating you today", "missionNL": "Oefen geduld met iemand die je vandaag frustreert", "hintEN": "Breathe. Consider what might be going on for them that you can't see.", "hintNL": "Adem. Bedenk wat er bij hen speelt wat jij niet kunt zien." },
+  { "id": 30, "category": "community",     "difficulty": "easy",   "missionEN": "Tidy up a shared space — office kitchen, communal area, street — without being asked", "missionNL": "Ruim een gedeelde ruimte op — kantinekeuken, gemeenschappelijke ruimte, straat — zonder dat erom gevraagd wordt", "hintEN": "The person who benefits might never know it was you. That's fine.", "hintNL": "Degene die er baat bij heeft, weet misschien nooit dat jij het was. Dat is prima." },
+  { "id": 31, "category": "relationships", "difficulty": "medium", "missionEN": "Let someone vent or talk without offering any advice — just listen", "missionNL": "Laat iemand zijn hart luchten of praten zonder advies te geven — luister gewoon", "hintEN": "Ask \"do you want me to listen or help solve it?\" Most people just want to be heard.", "hintNL": "Vraag \"wil je dat ik luister of help oplossen?\" De meeste mensen willen gewoon gehoord worden." },
+  { "id": 32, "category": "relationships", "difficulty": "easy",   "missionEN": "Genuinely celebrate a success or achievement of someone in your life", "missionNL": "Vier oprecht een succes of prestatie van iemand in je leven", "hintEN": "Make it about them, not about your reaction. Say specifically what you admire.", "hintNL": "Maak het over hen, niet over jouw reactie. Zeg specifiek wat je bewondert." },
+  { "id": 33, "category": "self",          "difficulty": "hard",   "missionEN": "In a disagreement today, choose understanding over being right", "missionNL": "Kies in een meningsverschil vandaag voor begrip in plaats van gelijk hebben", "hintEN": "Ask one genuine question about their perspective before you respond. You might be surprised.", "hintNL": "Stel één oprechte vraag over hun perspectief voordat je antwoordt. Je kunt verrast worden." },
+  { "id": 34, "category": "others",        "difficulty": "easy",   "missionEN": "Acknowledge at least five people today with eye contact and a nod", "missionNL": "Erken vandaag minimaal vijf mensen met oogcontact en een knikje", "hintEN": "In a world of screens, simply being seen can mean a lot. You don't need words.", "hintNL": "In een wereld van schermen kan simpelweg gezien worden veel betekenen. Je hebt geen woorden nodig." },
+  { "id": 35, "category": "community",     "difficulty": "easy",   "missionEN": "Buy something from a local, independent shop instead of a chain", "missionNL": "Koop iets bij een lokale, onafhankelijke winkel in plaats van een keten", "hintEN": "The difference between a thriving local business and a closed one is often just a few loyal customers.", "hintNL": "Het verschil tussen een bloeiend lokaal bedrijf en een gesloten winkel zijn vaak maar een paar vaste klanten." },
+  { "id": 36, "category": "relationships", "difficulty": "easy",   "missionEN": "Send someone a photo or something you saw today that reminded you of them", "missionNL": "Stuur iemand een foto of iets wat je vandaag zag en dat je aan hen deed denken", "hintEN": "It doesn't need context. \"Saw this, thought of you\" is enough.", "hintNL": "Het heeft geen context nodig. \"Zag dit, moest aan je denken\" is genoeg." },
+  { "id": 37, "category": "relationships", "difficulty": "hard",   "missionEN": "In a tension or conflict, be the first one to break the ice", "missionNL": "Wees in een spanning of conflict degene die als eerste het ijs breekt", "hintEN": "Being first doesn't mean you were wrong. It means you value the relationship more than the argument.", "hintNL": "Als eerste zijn betekent niet dat je ongelijk had. Het betekent dat je de relatie meer waardeert dan het argument." },
+  { "id": 38, "category": "relationships", "difficulty": "easy",   "missionEN": "Recommend a book, tool, or resource that genuinely helped you to someone who could use it", "missionNL": "Beveel een boek, tool of bron aan die jou echt heeft geholpen aan iemand die er baat bij kan hebben", "hintEN": "The best recommendations are personal — explain how it helped you, not just what it is.", "hintNL": "De beste aanbevelingen zijn persoonlijk — leg uit hoe het jou hielp, niet alleen wat het is." },
+  { "id": 39, "category": "self",          "difficulty": "medium", "missionEN": "Spend one evening without screens — give that time to people or yourself", "missionNL": "Breng één avond door zonder schermen — geef die tijd aan mensen of aan jezelf", "hintEN": "Tell someone about it in advance so you can hold each other accountable.", "hintNL": "Vertel iemand er van tevoren over zodat je elkaar kunt aansporen." },
+  { "id": 40, "category": "relationships", "difficulty": "medium", "missionEN": "Tell three people today something you are genuinely grateful for about them", "missionNL": "Vertel vandaag drie mensen iets waarvoor je hen echt dankbaar bent", "hintEN": "Gratitude unexpressed is wasted. Say it out loud, not just in your head.", "hintNL": "Niet uitgesproken dankbaarheid is verspild. Zeg het hardop, niet alleen in je hoofd." }
 ]

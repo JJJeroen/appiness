@@ -9,11 +9,7 @@ import {
   Mission, getNextMission, completeMission, skipMission, getSkips,
 } from '../src/services/MissionService';
 import { useLocale } from '../src/hooks/useLocale';
-import { gradients, colors, typography } from '../src/theme';
-
-function pickGradient(missionId: number): [string, string] {
-  return gradients[missionId % gradients.length];
-}
+import { getGradient, colors, typography } from '../src/theme';
 
 export default function MissionScreen() {
   const locale = useLocale();
@@ -48,7 +44,7 @@ export default function MissionScreen() {
   };
 
   if (loading || !mission) {
-    const gradient = mission ? pickGradient(mission.id) : gradients[0];
+    const gradient: [string, string] = ['#C17A74', '#7A3E3E'];
     return (
       <LinearGradient colors={gradient} style={styles.container}>
         <ActivityIndicator color="#fff" size="large" />
@@ -56,7 +52,7 @@ export default function MissionScreen() {
     );
   }
 
-  const gradient = pickGradient(mission.id);
+  const gradient = getGradient(mission.category, mission.difficulty);
   const missionText = locale === 'nl' ? mission.missionNL : mission.missionEN;
   const hintText = locale === 'nl' ? mission.hintNL : mission.hintEN;
   const canSkip = skips > 0;
