@@ -1,5 +1,6 @@
 import * as Notifications from 'expo-notifications';
 import { getLocale } from '../hooks/useLocale';
+import { getNotificationHour } from './SettingsService';
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -27,7 +28,7 @@ export async function requestAndSchedule(): Promise<boolean> {
 export async function scheduleDailyReminder(): Promise<void> {
   await Notifications.cancelAllScheduledNotificationsAsync();
 
-  const locale = getLocale();
+  const [locale, hour] = await Promise.all([Promise.resolve(getLocale()), getNotificationHour()]);
   await Notifications.scheduleNotificationAsync({
     content: {
       title: 'Appiness',
@@ -37,7 +38,7 @@ export async function scheduleDailyReminder(): Promise<void> {
     },
     trigger: {
       type: Notifications.SchedulableTriggerInputTypes.DAILY,
-      hour: 9,
+      hour,
       minute: 0,
     },
   });

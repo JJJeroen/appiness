@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import missionsData from '../data/missions.json';
 import { Category, Difficulty } from '../theme';
+import { getEnabledCategories } from './SettingsService';
 
 export type Mission = {
   id: number;
@@ -78,7 +79,7 @@ async function saveQueue(queue: number[]): Promise<void> {
 }
 
 async function assignNewTodaysMission(): Promise<Mission> {
-  const total = await getTotalCompletions();
+  const [total, enabled] = await Promise.all([getTotalCompletions(), getEnabledCategories()]);
   const hardUnlocked = total >= HARD_UNLOCK_THRESHOLD;
 
   let queue = await getQueue();
@@ -87,10 +88,17 @@ async function assignNewTodaysMission(): Promise<Mission> {
     await saveQueue(queue);
   }
 
-  // Find first mission in queue that respects the hard gate
-  let nextId = queue[0];
+  // Narrow to enabled categories; fall back to full queue if all filtered out
+  const categoryFiltered = queue.filter((id) => {
+    const m = missions.find((x) => x.id === id);
+    return m && enabled.includes(m.category);
+  });
+  const pool = categoryFiltered.length > 0 ? categoryFiltered : queue;
+
+  // Within that pool, find first mission that respects the hard gate
+  let nextId = pool[0];
   if (!hardUnlocked) {
-    const eligible = queue.find((id) => {
+    const eligible = pool.find((id) => {
       const m = missions.find((x) => x.id === id);
       return m && m.difficulty !== 'hard';
     });

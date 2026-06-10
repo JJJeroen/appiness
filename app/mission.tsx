@@ -149,6 +149,9 @@ export default function MissionScreen() {
             <TouchableOpacity onPress={() => router.push('/history')} style={styles.historyButton}>
               <Text style={styles.historyButtonText}>{locale === 'nl' ? 'Historie' : 'History'}</Text>
             </TouchableOpacity>
+            <TouchableOpacity onPress={() => router.push('/settings')} style={styles.settingsButton}>
+              <Ionicons name="settings-outline" size={20} color={colors.textMuted} />
+            </TouchableOpacity>
           </View>
         </View>
 
@@ -371,6 +374,7 @@ const styles = StyleSheet.create({
     color: colors.text,
   },
   historyButton: { padding: 4 },
+  settingsButton: { padding: 4 },
   historyButtonText: {
     color: colors.textMuted,
     fontSize: 15,
