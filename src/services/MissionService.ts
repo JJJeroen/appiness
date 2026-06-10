@@ -18,14 +18,16 @@ export type CompletedEntry = {
 };
 
 const KEYS = {
-  queue:             '@appiness/queue',
-  completed:         '@appiness/completed',
-  skips:             '@appiness/skips',
-  firstLaunch:       '@appiness/firstLaunch',
-  todaysMissionId:   '@appiness/todaysMissionId',
-  lastAssignedDate:  '@appiness/lastAssignedDate',
-  lastCompletedDate: '@appiness/lastCompletedDate',
-  streak:            '@appiness/streak',
+  queue:                 '@appiness/queue',
+  completed:             '@appiness/completed',
+  skips:                 '@appiness/skips',
+  firstLaunch:           '@appiness/firstLaunch',
+  todaysMissionId:       '@appiness/todaysMissionId',
+  lastAssignedDate:      '@appiness/lastAssignedDate',
+  lastCompletedDate:     '@appiness/lastCompletedDate',
+  streak:                '@appiness/streak',
+  totalCompletions:      '@appiness/totalCompletions',
+  notificationPrompted:  '@appiness/notificationPrompted',
 };
 
 const MAX_SKIPS = 2;
@@ -147,6 +149,10 @@ export async function completeMission(missionId: number): Promise<void> {
   // Award skip (capped at MAX_SKIPS)
   const currentSkips = await getSkips();
   await AsyncStorage.setItem(KEYS.skips, JSON.stringify(Math.min(currentSkips + 1, MAX_SKIPS)));
+
+  // Increment total completions counter
+  const total = await getTotalCompletions();
+  await AsyncStorage.setItem(KEYS.totalCompletions, JSON.stringify(total + 1));
 }
 
 // Skip replaces today's mission with the next one in queue. Does not defer to tomorrow.
@@ -197,6 +203,65 @@ export async function getHistory(): Promise<(CompletedEntry & { mission: Mission
   } catch {
     return [];
   }
+}
+
+export async function getTotalCompletions(): Promise<number> {
+  try {
+    const raw = await AsyncStorage.getItem(KEYS.totalCompletions);
+    return raw ? JSON.parse(raw) : 0;
+  } catch {
+    return 0;
+  }
+}
+
+// Reverses the most recent completion. Safe to call only within a short window after completeMission.
+export async function undoLastCompletion(): Promise<void> {
+  const today = todayStr();
+  try {
+    const raw = await AsyncStorage.getItem(KEYS.completed);
+    const history: CompletedEntry[] = raw ? JSON.parse(raw) : [];
+    if (history.length === 0) return;
+
+    const last = history[0];
+    const remaining = history.slice(1);
+    await AsyncStorage.setItem(KEYS.completed, JSON.stringify(remaining));
+
+    // Put the mission back at the front of the queue
+    const queue = await getQueue();
+    await saveQueue([last.missionId, ...queue.filter((id) => id !== last.missionId)]);
+    await AsyncStorage.setItem(KEYS.todaysMissionId, JSON.stringify(last.missionId));
+
+    // If this was the only completion today, reverse the streak increment and lastCompletedDate
+    const stillCompletedToday = remaining.some((e) => e.completionDate.startsWith(today));
+    if (!stillCompletedToday) {
+      const current = await getStreak();
+      await AsyncStorage.setItem(KEYS.streak, JSON.stringify(Math.max(0, current - 1)));
+      if (remaining.length > 0) {
+        await AsyncStorage.setItem(KEYS.lastCompletedDate, remaining[0].completionDate.split('T')[0]);
+      } else {
+        await AsyncStorage.removeItem(KEYS.lastCompletedDate);
+      }
+    }
+
+    // Remove the skip that was awarded
+    const currentSkips = await getSkips();
+    await AsyncStorage.setItem(KEYS.skips, JSON.stringify(Math.max(0, currentSkips - 1)));
+
+    // Decrement total completions
+    const total = await getTotalCompletions();
+    await AsyncStorage.setItem(KEYS.totalCompletions, JSON.stringify(Math.max(0, total - 1)));
+  } catch {
+    // Undo failed — state may be inconsistent, but no crash
+  }
+}
+
+export async function hasPromptedForNotification(): Promise<boolean> {
+  const raw = await AsyncStorage.getItem(KEYS.notificationPrompted);
+  return raw === 'true';
+}
+
+export async function markNotificationPrompted(): Promise<void> {
+  await AsyncStorage.setItem(KEYS.notificationPrompted, 'true');
 }
 
 export async function isFirstLaunch(): Promise<boolean> {

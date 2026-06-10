@@ -11,7 +11,7 @@ type HistoryEntry = CompletedEntry & { mission: Mission };
 
 function formatDate(iso: string): string {
   const d = new Date(iso);
-  return `${d.getDate()}-${d.getMonth() + 1}`;
+  return d.toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
 }
 
 export default function HistoryScreen() {

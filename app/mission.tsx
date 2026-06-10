@@ -1,47 +1,71 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import {
-  View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, Pressable,
+  View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, Pressable, Animated,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import {
-  Mission, getTodaysMission, completeMission, skipMission, getSkips, getStreak,
+  Mission, getTodaysMission, completeMission, skipMission,
+  undoLastCompletion, getSkips, getStreak, getTotalCompletions,
+  hasPromptedForNotification, markNotificationPrompted,
 } from '../src/services/MissionService';
 import { useLocale } from '../src/hooks/useLocale';
 import { getGradient, colors, typography } from '../src/theme';
+import { requestAndSchedule } from '../src/services/NotificationService';
+
+const UNDO_WINDOW_MS = 5000;
 
 export default function MissionScreen() {
   const locale = useLocale();
   const [mission, setMission] = useState<Mission | null | undefined>(undefined);
   const [skips, setSkips] = useState(0);
   const [streak, setStreak] = useState(0);
+  const [totalCompletions, setTotalCompletions] = useState(0);
   const [showTip, setShowTip] = useState(false);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [showUndo, setShowUndo] = useState(false);
+  const undoTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
     setShowTip(false);
-    const [next, availableSkips, currentStreak] = await Promise.all([
+    const [next, availableSkips, currentStreak, total] = await Promise.all([
       getTodaysMission(),
       getSkips(),
       getStreak(),
+      getTotalCompletions(),
     ]);
     setMission(next);
     setSkips(availableSkips);
     setStreak(currentStreak);
+    setTotalCompletions(total);
     setLoading(false);
     setSubmitting(false);
   }, []);
 
   useEffect(() => { load(); }, [load]);
 
+  // Clean up undo timer on unmount
+  useEffect(() => () => { if (undoTimeout.current) clearTimeout(undoTimeout.current); }, []);
+
   const handleDone = async () => {
     if (!mission || submitting) return;
     setSubmitting(true);
     await completeMission(mission.id);
+    setShowUndo(true);
+    undoTimeout.current = setTimeout(() => {
+      setShowUndo(false);
+      load();
+    }, UNDO_WINDOW_MS);
+  };
+
+  const handleUndo = async () => {
+    if (undoTimeout.current) clearTimeout(undoTimeout.current);
+    setShowUndo(false);
+    await undoLastCompletion();
     load();
   };
 
@@ -52,7 +76,6 @@ export default function MissionScreen() {
     load();
   };
 
-  // Loading state
   if (loading || mission === undefined) {
     return (
       <LinearGradient colors={getGradient('others', 'easy')} style={styles.container}>
@@ -61,9 +84,15 @@ export default function MissionScreen() {
     );
   }
 
-  // Completed today — rest until tomorrow
   if (mission === null) {
-    return <CompletedTodayView locale={locale} streak={streak} />;
+    return (
+      <CompletedTodayView
+        locale={locale}
+        streak={streak}
+        totalCompletions={totalCompletions}
+        onNotificationPromptHandled={load}
+      />
+    );
   }
 
   const gradient = getGradient(mission.category, mission.difficulty);
@@ -80,7 +109,11 @@ export default function MissionScreen() {
               <Ionicons name="flame" size={14} color="rgba(255,255,255,0.9)" />
               <Text style={styles.streakText}>{streak}</Text>
             </View>
-          ) : <View />}
+          ) : (
+            <View style={styles.dayOneBadge}>
+              <Text style={styles.dayOneText}>{locale === 'nl' ? 'Dag 1' : 'Day 1'}</Text>
+            </View>
+          )}
           <View style={styles.headerRight}>
             {canSkip && (
               <View style={styles.skipBadge}>
@@ -100,7 +133,7 @@ export default function MissionScreen() {
               <Text style={styles.tipText}>{hintText}</Text>
             ) : (
               <Pressable onPress={() => setShowTip(true)} style={styles.tipButton}>
-                <Text style={styles.tipButtonText}>? Tip</Text>
+                <Text style={styles.tipButtonText}>{locale === 'nl' ? 'Tip' : 'Tip'}</Text>
               </Pressable>
             )}
           </View>
@@ -127,6 +160,14 @@ export default function MissionScreen() {
             <Text style={styles.doneText}>{locale === 'nl' ? 'Gedaan' : 'Done'}</Text>
           </TouchableOpacity>
         </View>
+
+        {showUndo && (
+          <TouchableOpacity style={styles.undoToast} onPress={handleUndo} activeOpacity={0.85}>
+            <Text style={styles.undoText}>
+              {locale === 'nl' ? 'Gemarkeerd als klaar — Ongedaan maken?' : 'Marked as done — Undo?'}
+            </Text>
+          </TouchableOpacity>
+        )}
       </SafeAreaView>
     </LinearGradient>
   );
@@ -134,8 +175,38 @@ export default function MissionScreen() {
 
 // ─── Completed today view ─────────────────────────────────────────────────────
 
-function CompletedTodayView({ locale, streak }: { locale: 'nl' | 'en'; streak: number }) {
+function CompletedTodayView({
+  locale, streak, totalCompletions, onNotificationPromptHandled,
+}: {
+  locale: 'nl' | 'en';
+  streak: number;
+  totalCompletions: number;
+  onNotificationPromptHandled: () => void;
+}) {
+  const [showNotifPrompt, setShowNotifPrompt] = useState(false);
   const gradient = getGradient('self', 'medium');
+
+  useEffect(() => {
+    if (totalCompletions === 1) {
+      hasPromptedForNotification().then((already) => {
+        if (!already) setShowNotifPrompt(true);
+      });
+    }
+  }, [totalCompletions]);
+
+  const handleEnableNotifications = async () => {
+    await markNotificationPrompted();
+    await requestAndSchedule();
+    setShowNotifPrompt(false);
+    onNotificationPromptHandled();
+  };
+
+  const handleDeclineNotifications = async () => {
+    await markNotificationPrompted();
+    setShowNotifPrompt(false);
+    onNotificationPromptHandled();
+  };
+
   const copy = {
     en: {
       well: 'Well done.',
@@ -143,6 +214,9 @@ function CompletedTodayView({ locale, streak }: { locale: 'nl' | 'en'; streak: n
         ? `${streak} days in a row. Come back tomorrow for your next mission.`
         : 'Come back tomorrow for your next mission.',
       history: 'See history',
+      notifQuestion: 'Want a daily reminder?',
+      notifYes: 'Enable notifications',
+      notifNo: 'No thanks',
     },
     nl: {
       well: 'Goed gedaan.',
@@ -150,6 +224,9 @@ function CompletedTodayView({ locale, streak }: { locale: 'nl' | 'en'; streak: n
         ? `${streak} dagen op rij. Kom morgen terug voor je volgende missie.`
         : 'Kom morgen terug voor je volgende missie.',
       history: 'Bekijk historie',
+      notifQuestion: 'Wil je een dagelijkse herinnering?',
+      notifYes: 'Meldingen inschakelen',
+      notifNo: 'Nee bedankt',
     },
   }[locale];
 
@@ -165,9 +242,22 @@ function CompletedTodayView({ locale, streak }: { locale: 'nl' | 'en'; streak: n
           )}
           <Text style={styles.completedTitle}>{copy.well}</Text>
           <Text style={styles.completedBody}>{copy.body}</Text>
-          <TouchableOpacity onPress={() => router.push('/history')} style={styles.historyLink}>
-            <Text style={styles.historyLinkText}>{copy.history}</Text>
-          </TouchableOpacity>
+
+          {showNotifPrompt ? (
+            <View style={styles.notifPrompt}>
+              <Text style={styles.notifQuestion}>{copy.notifQuestion}</Text>
+              <TouchableOpacity style={styles.notifYesButton} onPress={handleEnableNotifications} activeOpacity={0.8}>
+                <Text style={styles.notifYesText}>{copy.notifYes}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={handleDeclineNotifications} style={styles.notifNoButton}>
+                <Text style={styles.notifNoText}>{copy.notifNo}</Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <TouchableOpacity onPress={() => router.push('/history')} style={styles.historyLink}>
+              <Text style={styles.historyLinkText}>{copy.history}</Text>
+            </TouchableOpacity>
+          )}
         </View>
       </SafeAreaView>
     </LinearGradient>
@@ -204,6 +294,16 @@ const styles = StyleSheet.create({
   streakText: {
     ...typography.skipBadge,
     color: colors.text,
+  },
+  dayOneBadge: {
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    borderRadius: 20,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+  },
+  dayOneText: {
+    ...typography.skipBadge,
+    color: 'rgba(255,255,255,0.5)',
   },
   skipBadge: {
     backgroundColor: colors.skip,
@@ -296,6 +396,23 @@ const styles = StyleSheet.create({
     color: colors.done,
   },
 
+  undoToast: {
+    position: 'absolute',
+    bottom: 100,
+    left: 24,
+    right: 24,
+    backgroundColor: 'rgba(0,0,0,0.55)',
+    borderRadius: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    alignItems: 'center',
+  },
+  undoText: {
+    color: '#fff',
+    fontSize: 15,
+    fontWeight: '500',
+  },
+
   // Completed today
   completedContainer: {
     flex: 1,
@@ -340,5 +457,38 @@ const styles = StyleSheet.create({
     ...typography.button,
     color: colors.text,
     fontSize: 16,
+  },
+  notifPrompt: {
+    marginTop: 24,
+    alignItems: 'center',
+    gap: 12,
+    width: '100%',
+  },
+  notifQuestion: {
+    ...typography.tip,
+    color: colors.textMuted,
+    textAlign: 'center',
+  },
+  notifYesButton: {
+    width: '100%',
+    backgroundColor: colors.doneBg,
+    borderRadius: 14,
+    paddingVertical: 14,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.3)',
+  },
+  notifYesText: {
+    ...typography.button,
+    color: colors.text,
+    fontSize: 16,
+  },
+  notifNoButton: {
+    paddingVertical: 8,
+  },
+  notifNoText: {
+    color: colors.textMuted,
+    fontSize: 15,
+    fontWeight: '500',
   },
 });

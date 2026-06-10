@@ -4,7 +4,6 @@ import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocale } from '../src/hooks/useLocale';
 import { gradients, colors, typography } from '../src/theme';
-import { requestAndSchedule } from '../src/services/NotificationService';
 
 const copy = {
   en: {
@@ -40,10 +39,7 @@ export default function OnboardingScreen() {
         <TouchableOpacity
           style={styles.button}
           activeOpacity={0.8}
-          onPress={async () => {
-            await requestAndSchedule(); // ask for notification permission; navigate regardless
-            router.replace('/mission');
-          }}
+          onPress={() => router.replace('/mission')}
         >
           <Text style={styles.buttonText}>{t.cta}</Text>
         </TouchableOpacity>
