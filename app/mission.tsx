@@ -10,6 +10,7 @@ import {
   Mission, getTodaysMission, completeMission, skipMission,
   undoLastCompletion, getSkips, getStreak, getTotalCompletions,
   hasPromptedForNotification, markNotificationPrompted,
+  deferMission, isDeferredToday, getStreakFreezes,
 } from '../src/services/MissionService';
 import { useLocale } from '../src/hooks/useLocale';
 import { getGradient, colors, typography } from '../src/theme';
@@ -27,21 +28,27 @@ export default function MissionScreen() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [showUndo, setShowUndo] = useState(false);
+  const [isDeferred, setIsDeferred] = useState(false);
+  const [freezes, setFreezes] = useState(0);
   const undoTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
     setShowTip(false);
-    const [next, availableSkips, currentStreak, total] = await Promise.all([
+    const [next, availableSkips, currentStreak, total, deferred, currentFreezes] = await Promise.all([
       getTodaysMission(),
       getSkips(),
       getStreak(),
       getTotalCompletions(),
+      isDeferredToday(),
+      getStreakFreezes(),
     ]);
     setMission(next);
     setSkips(availableSkips);
     setStreak(currentStreak);
     setTotalCompletions(total);
+    setIsDeferred(deferred);
+    setFreezes(currentFreezes);
     setLoading(false);
     setSubmitting(false);
   }, []);
@@ -76,12 +83,23 @@ export default function MissionScreen() {
     load();
   };
 
+  const handleDefer = async () => {
+    if (!mission || submitting) return;
+    setSubmitting(true);
+    await deferMission(mission.id);
+    load();
+  };
+
   if (loading || mission === undefined) {
     return (
       <LinearGradient colors={getGradient('others', 'easy')} style={styles.container}>
         <ActivityIndicator color="#fff" size="large" />
       </LinearGradient>
     );
+  }
+
+  if (isDeferred) {
+    return <CompletedTodayView locale={locale} streak={streak} totalCompletions={0} onNotificationPromptHandled={load} deferred />;
   }
 
   if (mission === null) {
@@ -104,16 +122,24 @@ export default function MissionScreen() {
     <LinearGradient colors={gradient} style={styles.container}>
       <SafeAreaView style={styles.safe}>
         <View style={styles.header}>
-          {streak > 0 ? (
-            <View style={styles.streakBadge}>
-              <Ionicons name="flame" size={14} color="rgba(255,255,255,0.9)" />
-              <Text style={styles.streakText}>{streak}</Text>
-            </View>
-          ) : (
-            <View style={styles.dayOneBadge}>
-              <Text style={styles.dayOneText}>{locale === 'nl' ? 'Dag 1' : 'Day 1'}</Text>
-            </View>
-          )}
+          <View style={styles.headerLeft}>
+            {streak > 0 ? (
+              <View style={styles.streakBadge}>
+                <Ionicons name="flame" size={14} color="rgba(255,255,255,0.9)" />
+                <Text style={styles.streakText}>{streak}</Text>
+              </View>
+            ) : (
+              <View style={styles.dayOneBadge}>
+                <Text style={styles.dayOneText}>{locale === 'nl' ? 'Dag 1' : 'Day 1'}</Text>
+              </View>
+            )}
+            {freezes > 0 && (
+              <View style={styles.freezeBadge}>
+                <Ionicons name="snow" size={12} color="rgba(255,255,255,0.7)" />
+                <Text style={styles.freezeText}>{freezes}</Text>
+              </View>
+            )}
+          </View>
           <View style={styles.headerRight}>
             {canSkip && (
               <View style={styles.skipBadge}>
@@ -161,6 +187,12 @@ export default function MissionScreen() {
           </TouchableOpacity>
         </View>
 
+        <TouchableOpacity onPress={handleDefer} disabled={submitting} style={styles.notTodayButton}>
+          <Text style={styles.notTodayText}>
+            {locale === 'nl' ? 'Niet vandaag' : 'Not today'}
+          </Text>
+        </TouchableOpacity>
+
         {showUndo && (
           <TouchableOpacity style={styles.undoToast} onPress={handleUndo} activeOpacity={0.85}>
             <Text style={styles.undoText}>
@@ -176,23 +208,24 @@ export default function MissionScreen() {
 // ─── Completed today view ─────────────────────────────────────────────────────
 
 function CompletedTodayView({
-  locale, streak, totalCompletions, onNotificationPromptHandled,
+  locale, streak, totalCompletions, onNotificationPromptHandled, deferred = false,
 }: {
   locale: 'nl' | 'en';
   streak: number;
   totalCompletions: number;
   onNotificationPromptHandled: () => void;
+  deferred?: boolean;
 }) {
   const [showNotifPrompt, setShowNotifPrompt] = useState(false);
   const gradient = getGradient('self', 'medium');
 
   useEffect(() => {
-    if (totalCompletions === 1) {
+    if (!deferred && totalCompletions === 1) {
       hasPromptedForNotification().then((already) => {
         if (!already) setShowNotifPrompt(true);
       });
     }
-  }, [totalCompletions]);
+  }, [totalCompletions, deferred]);
 
   const handleEnableNotifications = async () => {
     await markNotificationPrompted();
@@ -209,20 +242,24 @@ function CompletedTodayView({
 
   const copy = {
     en: {
-      well: 'Well done.',
-      body: streak > 1
-        ? `${streak} days in a row. Come back tomorrow for your next mission.`
-        : 'Come back tomorrow for your next mission.',
+      well: deferred ? 'No worries.' : 'Well done.',
+      body: deferred
+        ? 'Come back tomorrow for your mission.'
+        : streak > 1
+          ? `${streak} days in a row. Come back tomorrow for your next mission.`
+          : 'Come back tomorrow for your next mission.',
       history: 'See history',
       notifQuestion: 'Want a daily reminder?',
       notifYes: 'Enable notifications',
       notifNo: 'No thanks',
     },
     nl: {
-      well: 'Goed gedaan.',
-      body: streak > 1
-        ? `${streak} dagen op rij. Kom morgen terug voor je volgende missie.`
-        : 'Kom morgen terug voor je volgende missie.',
+      well: deferred ? 'Geen probleem.' : 'Goed gedaan.',
+      body: deferred
+        ? 'Kom morgen terug voor je missie.'
+        : streak > 1
+          ? `${streak} dagen op rij. Kom morgen terug voor je volgende missie.`
+          : 'Kom morgen terug voor je volgende missie.',
       history: 'Bekijk historie',
       notifQuestion: 'Wil je een dagelijkse herinnering?',
       notifYes: 'Meldingen inschakelen',
@@ -234,7 +271,7 @@ function CompletedTodayView({
     <LinearGradient colors={gradient} style={styles.container}>
       <SafeAreaView style={styles.safe}>
         <View style={styles.completedContainer}>
-          {streak > 1 && (
+          {!deferred && streak > 1 && (
             <View style={styles.streakLarge}>
               <Ionicons name="flame" size={32} color="rgba(255,255,255,0.9)" />
               <Text style={styles.streakLargeNumber}>{streak}</Text>
@@ -277,6 +314,11 @@ const styles = StyleSheet.create({
     paddingTop: 12,
     paddingBottom: 8,
   },
+  headerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
   headerRight: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -304,6 +346,19 @@ const styles = StyleSheet.create({
   dayOneText: {
     ...typography.skipBadge,
     color: 'rgba(255,255,255,0.5)',
+  },
+  freezeBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    backgroundColor: 'rgba(180,220,255,0.15)',
+    borderRadius: 20,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+  },
+  freezeText: {
+    ...typography.skipBadge,
+    color: 'rgba(255,255,255,0.7)',
   },
   skipBadge: {
     backgroundColor: colors.skip,
@@ -394,6 +449,19 @@ const styles = StyleSheet.create({
   doneText: {
     ...typography.button,
     color: colors.done,
+  },
+
+  notTodayButton: {
+    alignSelf: 'center',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    marginBottom: 8,
+  },
+  notTodayText: {
+    color: colors.textMuted,
+    fontSize: 14,
+    fontWeight: '500',
+    opacity: 0.7,
   },
 
   undoToast: {

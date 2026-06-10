@@ -28,9 +28,13 @@ const KEYS = {
   streak:                '@appiness/streak',
   totalCompletions:      '@appiness/totalCompletions',
   notificationPrompted:  '@appiness/notificationPrompted',
+  streakFreezes:         '@appiness/streakFreezes',
+  deferredToday:         '@appiness/deferredToday',  // ISO date if user deferred today
 };
 
 const MAX_SKIPS = 2;
+const MAX_FREEZES = 2;
+const HARD_UNLOCK_THRESHOLD = 7; // completions before hard missions enter the queue
 
 const missions: Mission[] = missionsData as Mission[];
 
@@ -74,12 +78,25 @@ async function saveQueue(queue: number[]): Promise<void> {
 }
 
 async function assignNewTodaysMission(): Promise<Mission> {
+  const total = await getTotalCompletions();
+  const hardUnlocked = total >= HARD_UNLOCK_THRESHOLD;
+
   let queue = await getQueue();
   if (queue.length === 0) {
     queue = shuffled(missions).map((m) => m.id);
     await saveQueue(queue);
   }
-  const nextId = queue[0];
+
+  // Find first mission in queue that respects the hard gate
+  let nextId = queue[0];
+  if (!hardUnlocked) {
+    const eligible = queue.find((id) => {
+      const m = missions.find((x) => x.id === id);
+      return m && m.difficulty !== 'hard';
+    });
+    if (eligible !== undefined) nextId = eligible;
+  }
+
   await AsyncStorage.setItem(KEYS.todaysMissionId, JSON.stringify(nextId));
   await AsyncStorage.setItem(KEYS.lastAssignedDate, todayStr());
   return missions.find((m) => m.id === nextId) ?? missions[0];
@@ -137,9 +154,33 @@ export async function completeMission(missionId: number): Promise<void> {
     const lastCompleted = await AsyncStorage.getItem(KEYS.lastCompletedDate);
     if (lastCompleted !== today) {
       const current = await getStreak();
-      const next = lastCompleted === yesterdayStr() ? current + 1 : 1;
+      const yesterday = yesterdayStr();
+      let next: number;
+      if (lastCompleted === yesterday) {
+        // Consecutive — increment
+        next = current + 1;
+      } else {
+        // Gap — check if a freeze covers it (only covers a single missed day)
+        const dayBeforeYesterday = (() => {
+          const d = new Date(); d.setDate(d.getDate() - 2);
+          return d.toISOString().split('T')[0];
+        })();
+        const freezes = await getStreakFreezes();
+        if (lastCompleted === dayBeforeYesterday && freezes > 0) {
+          await AsyncStorage.setItem(KEYS.streakFreezes, JSON.stringify(freezes - 1));
+          next = current + 1; // freeze bridged the gap
+        } else {
+          next = 1;
+        }
+      }
       await AsyncStorage.setItem(KEYS.streak, JSON.stringify(next));
       await AsyncStorage.setItem(KEYS.lastCompletedDate, today);
+
+      // Award a freeze at every 7-day streak milestone
+      if (next > 0 && next % 7 === 0) {
+        const currentFreezes = await getStreakFreezes();
+        await AsyncStorage.setItem(KEYS.streakFreezes, JSON.stringify(Math.min(currentFreezes + 1, MAX_FREEZES)));
+      }
     }
   } catch {
     await AsyncStorage.setItem(KEYS.streak, JSON.stringify(1));
@@ -202,6 +243,36 @@ export async function getHistory(): Promise<(CompletedEntry & { mission: Mission
     }));
   } catch {
     return [];
+  }
+}
+
+export async function getStreakFreezes(): Promise<number> {
+  try {
+    const raw = await AsyncStorage.getItem(KEYS.streakFreezes);
+    return raw ? JSON.parse(raw) : 0;
+  } catch {
+    return 0;
+  }
+}
+
+// Defers today's mission 3 positions back in the queue. Free — no skip cost.
+// The user sees "come back tomorrow" just like after completing.
+export async function deferMission(missionId: number): Promise<void> {
+  const queue = await getQueue();
+  const without = queue.filter((id) => id !== missionId);
+  const insertAt = Math.min(3, without.length);
+  const reordered = [...without.slice(0, insertAt), missionId, ...without.slice(insertAt)];
+  await saveQueue(reordered);
+  // Mark today as deferred so the screen shows "come back tomorrow"
+  await AsyncStorage.setItem(KEYS.deferredToday, todayStr());
+}
+
+export async function isDeferredToday(): Promise<boolean> {
+  try {
+    const raw = await AsyncStorage.getItem(KEYS.deferredToday);
+    return raw === todayStr();
+  } catch {
+    return false;
   }
 }
 
